@@ -1,0 +1,36 @@
+# Supabase project config. Link with `supabase link --project-ref <ref>`.
+# IMPORTANT: create the project in the Sydney (ap-southeast-2) region for
+# Australian data residency. Region is set at project creation and cannot be
+# changed afterwards.
+
+project_id = "interview-insights"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "interviewinsights://"
+additional_redirect_urls = ["interviewinsights://"]
+jwt_expiry = 3600
+enable_signup = false          # invite-only: no public sign-up
+enable_confirmations = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[edge_runtime]
+enabled = true
