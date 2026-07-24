@@ -28,10 +28,15 @@ read straight from Supabase via `src/lib/remote.ts` — no local mirror.
 
 ## AI pipeline (server-side; keys never on device)
 Edge Functions in `supabase/functions/`:
-- **transcribe** — Whisper `verbose_json`; derives a 0–100 **audio-quality** score
-  and per-segment flags. `no_speech_prob` (Whisper's hallucination tell) is
-  penalised separately and heavily; the transcript score is a length-weighted mean
-  reported alongside `flagged_segment_count` so one bad segment can't hide in a good mean.
+- **transcribe** — NVIDIA **Parakeet** (`nvidia/parakeet-tdt-0.6b-v3`) hosted on
+  **Together AI** via the OpenAI-compatible `/v1/audio/transcriptions` endpoint.
+  Derives a 0–100 **audio-quality** score (clarity, not accuracy) + per-segment
+  flags. Scoring is confidence-aware: if the provider returns per-segment/word
+  confidence or logprobs, that's the primary signal; otherwise it falls back to
+  timing/empty-segment heuristics (score may be null → shown as "—"). The transcript
+  score is a length-weighted mean reported alongside `flagged_segment_count` so one
+  bad segment can't hide in a good mean. Recordings are 16 kHz mono AAC.
+  Configurable via `TOGETHER_API_KEY`, `PARAKEET_MODEL`, `PARAKEET_API_URL`.
 - **generate-insights** — loads all transcripts, **groups them by question** (all
   ~10 answers to Q1 together, etc.) so Claude sees the parallel answers side by
   side, and returns ≤5 insights each with ≥1 verbatim evidence quote + transcript id

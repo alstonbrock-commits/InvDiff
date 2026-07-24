@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Button, Card, Empty, H1, H2, P, Row, Screen } from '@/components/ui';
+import { ActionTile, Button, Card, Empty, H1, H2, P, Row, Screen } from '@/components/ui';
 import { SyncBanner } from '@/components/SyncBanner';
 import {
   eventProgress,
@@ -17,6 +17,7 @@ import type {
   IntervieweeRow,
   QuestionRow,
 } from '@/lib/types';
+import { notifyEventLogged } from '@/lib/ai';
 import { colors, spacing } from '@/lib/theme';
 
 // cell status → colour
@@ -67,6 +68,8 @@ export default function EventGrid() {
           text: 'Finalise',
           onPress: async () => {
             await setEventStatus(id!, 'finalised');
+            // Best-effort admin email (in-app feed is guaranteed server-side).
+            notifyEventLogged(id!).catch(() => {});
             void load();
           },
         },
@@ -83,34 +86,27 @@ export default function EventGrid() {
         {progress.uploaded} uploaded
       </P>
 
-      <Row>
+      <ActionTile
+        tone="primary"
+        title="Add interviewee"
+        subtitle="Capture consent, then record answers"
+        onPress={() => router.push(`/interviewee/new?eventId=${id}`)}
+      />
+      <ActionTile
+        title="Review transcripts"
+        subtitle="Approve or edit before generating insights"
+        onPress={() => router.push(`/events/${id}/transcripts`)}
+      />
+      <Row style={{ gap: spacing(3) }}>
         <View style={{ flex: 1 }}>
-          <Button
-            title="Edit questions"
-            variant="secondary"
-            onPress={() => router.push(`/events/${id}/questions`)}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button
-            title="+ Interviewee"
-            onPress={() => router.push(`/interviewee/new?eventId=${id}`)}
-          />
-        </View>
-      </Row>
-
-      <Row>
-        <View style={{ flex: 1 }}>
-          <Button
+          <ActionTile
             title="Insights"
-            variant="secondary"
             onPress={() => router.push(`/events/${id}/insights`)}
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Button
+          <ActionTile
             title="Export"
-            variant="secondary"
             onPress={() => router.push(`/events/${id}/export`)}
           />
         </View>

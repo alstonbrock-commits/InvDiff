@@ -25,8 +25,8 @@ enabled = true
 site_url = "interviewinsights://"
 additional_redirect_urls = ["interviewinsights://"]
 jwt_expiry = 3600
-enable_signup = false          # invite-only: no public sign-up
-enable_confirmations = true
+enable_signup = true           # open sign-up: facilitators self-register (Google/Apple)
+enable_confirmations = false   # OAuth-verified; no email confirmation step
 
 [storage]
 enabled = true

@@ -78,8 +78,8 @@ export interface Segment {
   start: number;
   end: number;
   text: string;
-  score: number;
-  no_speech_prob: number;
+  score: number | null; // null when the provider returns no confidence
+  no_speech_prob?: number; // legacy (Whisper); Parakeet omits it
   flagged: boolean;
 }
 

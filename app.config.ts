@@ -1,8 +1,8 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
-// App identity — CHANGE these before submitting to the stores.
-const APP_NAME = 'Interview Insights';
-const BUNDLE_ID = 'com.yourorg.interviewinsights';
+// App identity — CHANGE the bundle id before submitting to the stores.
+const APP_NAME = 'Event Insight';
+const BUNDLE_ID = 'com.investigationsdifferently.eventinsight';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -12,9 +12,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   scheme: 'interviewinsights',
   userInterfaceStyle: 'automatic',
+  icon: './assets/id-mark-color.png',
   splash: {
+    image: './assets/id-mark-color.png',
     resizeMode: 'contain',
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
   },
   assetBundlePatterns: ['**/*'],
   ios: {
@@ -31,11 +33,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     package: BUNDLE_ID,
     versionCode: 1,
     permissions: ['RECORD_AUDIO', 'INTERNET'],
+    adaptiveIcon: {
+      foregroundImage: './assets/id-mark-color.png',
+      backgroundColor: '#FFFFFF',
+    },
   },
+  // NOTE: expo-sqlite is NOT listed here — it ships no config plugin, and listing
+  // it makes Expo try to load its ESM main during config eval, which crashes.
+  // The library works fine at runtime (Metro bundles it); it just isn't a plugin.
   plugins: [
     'expo-router',
     'expo-secure-store',
-    'expo-sqlite',
+    'expo-web-browser',
+    'expo-font',
     [
       'expo-av',
       {

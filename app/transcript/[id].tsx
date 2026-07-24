@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Badge, Button, Card, H1, H2, Input, P, Row, Screen } from '@/components/ui';
-import { useAuth } from '@/lib/auth';
 import {
   approveTranscript,
   fetchEventTranscripts,
@@ -39,7 +38,6 @@ function HighlightedText({ t }: { t: TranscriptDetail }) {
 
 export default function TranscriptScreen() {
   const { id, eventId } = useLocalSearchParams<{ id: string; eventId?: string }>();
-  const { isAdmin } = useAuth();
   const router = useRouter();
   const [t, setT] = useState<TranscriptDetail | null>(null);
   const [edit, setEdit] = useState('');
@@ -184,17 +182,15 @@ export default function TranscriptScreen() {
         <Button title="Edit transcript" variant="secondary" onPress={() => setEditing(true)} />
       )}
 
-      {isAdmin ? (
-        <Card>
-          <H2>Admin review</H2>
-          <Button
-            title={editing ? 'Approve with edits' : 'Approve'}
-            onPress={() => approve(editing)}
-            loading={busy}
-          />
-          <Button title="Reject back to facilitator" variant="danger" onPress={reject} />
-        </Card>
-      ) : null}
+      <Card>
+        <H2>Review</H2>
+        <Button
+          title={editing ? 'Approve with edits' : 'Approve'}
+          onPress={() => approve(editing)}
+          loading={busy}
+        />
+        <Button title="Reject" variant="danger" onPress={reject} />
+      </Card>
     </Screen>
   );
 }

@@ -35,3 +35,10 @@ export function purgeEventAudio(eventId: string) {
     event_id: eventId,
   });
 }
+
+// Best-effort email alert to the admin that an event was logged. The in-app
+// feed is guaranteed by a DB trigger; this is the email channel (fires when the
+// facilitator is online at finalise time).
+export function notifyEventLogged(eventId: string) {
+  return callFunction<{ ok: boolean }>('notify-admin', { event_id: eventId });
+}

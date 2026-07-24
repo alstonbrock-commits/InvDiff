@@ -1,54 +1,97 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Button, H1, Input, P, Screen } from '@/components/ui';
+import { Brand, Button, Card, Input, P, Screen } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { colors, spacing } from '@/lib/theme';
 
 export default function Login() {
-  const { signIn } = useAuth();
+  const { signIn, signInWithProvider } = useAuth();
   const router = useRouter();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [adminMode, setAdminMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false);
 
-  async function onSignIn() {
+  async function oauth(provider: 'google' | 'apple') {
+    setBusy(provider);
+    try {
+      await signInWithProvider(provider);
+      router.replace('/');
+    } catch (e) {
+      Alert.alert('Sign in failed', String((e as Error).message ?? e));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function adminSignIn() {
     if (!email || !password) return;
-    setBusy(true);
+    setBusy('admin');
     try {
       await signIn(email.trim(), password);
       router.replace('/');
     } catch (e) {
       Alert.alert('Sign in failed', String((e as Error).message ?? e));
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   }
 
   return (
     <Screen>
-      <H1>Interview Insights</H1>
-      <P muted>Sign in with the account your administrator invited.</P>
-      <Input
-        label="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        autoComplete="email"
-        placeholder="you@example.com"
-      />
-      <Input
-        label="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        placeholder="••••••••"
-      />
-      <Button title="Sign in" onPress={onSignIn} loading={busy} />
-      <P muted>
-        No public sign-up. If you were invited by email, open the invite link on
-        this device to set your password.
-      </P>
+      <View style={{ height: spacing(10) }} />
+      {/* Long-press the logo to reveal the (hidden) administrator sign-in. */}
+      <Pressable onLongPress={() => setAdminMode(true)} delayLongPress={900}>
+        <Brand />
+      </Pressable>
+      <View style={{ height: spacing(6) }} />
+
+      {!adminMode ? (
+        <>
+          <Card>
+            <P muted>Create an account or sign in to start capturing events.</P>
+            <Button
+              title="Continue with Google"
+              variant="navy"
+              onPress={() => oauth('google')}
+              loading={busy === 'google'}
+            />
+            <Button
+              title="Continue with Apple"
+              variant="secondary"
+              onPress={() => oauth('apple')}
+              loading={busy === 'apple'}
+            />
+          </Card>
+          <P muted>No public admin. Sign in with Google or Apple to get started.</P>
+        </>
+      ) : (
+        <Card>
+          <P muted>Administrator sign-in.</P>
+          <Input
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholder="admin@example.com"
+          />
+          <Input
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholder="••••••••"
+          />
+          <Button title="Sign in" onPress={adminSignIn} loading={busy === 'admin'} />
+          <Pressable onPress={() => setAdminMode(false)} style={{ padding: spacing(2) }}>
+            <Text style={{ color: colors.textMuted, textAlign: 'center', fontSize: 13 }}>
+              ← Back
+            </Text>
+          </Pressable>
+        </Card>
+      )}
     </Screen>
   );
 }

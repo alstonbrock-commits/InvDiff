@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&amp;family=Public+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<meta name="design_doc_mode" content="canvas">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  a{color:#E4772A;text-decoration:none;}
+  a:hover{color:#c9631d;}
+</style>
+</helmet>
+
+<div style="width:1240px;margin:0 auto;background:#F6F5F1;font-family:'Public Sans',sans-serif;color:#17262D;padding:0 0 80px 0;">
+
+  <!-- HERO -->
+  <div style="background:{{ inkBg }};padding:88px 80px 80px 80px;position:relative;overflow:hidden;">
+    <img src="assets/id-mark.png?v=3" alt="Investigations Differently watermark" style="position:absolute;top:-36px;right:-30px;width:280px;height:280px;object-fit:contain;pointer-events:none;">
+    <div style="position:relative;z-index:1;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.32em;text-transform:uppercase;color:#7FC4D6;margin-bottom:36px;">By Investigations Differently</div>
+      <div style="display:flex;align-items:baseline;gap:2px;font-family:'Archivo',sans-serif;font-weight:800;font-size:96px;line-height:0.9;letter-spacing:-0.03em;">
+        <span style="color:{{ accent }};">Event</span><span style="color:#FFFFFF;">Insight</span>
+      </div>
+      <div style="margin-top:24px;max-width:640px;font-size:19px;line-height:1.5;color:#C6D4D9;">Structured event and incident intelligence — capture, investigate, and surface the insight that drives organisational change.</div>
+    </div>
+  </div>
+
+  <!-- LOGO LOCKUPS -->
+  <div style="padding:64px 80px 0 80px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#5D6B70;">01 — Logo</div>
+    <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:30px;margin:8px 0 32px 0;">The mark &amp; wordmark</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <!-- primary on light -->
+      <div style="background:#FFFFFF;border:1px solid #E5E3DC;border-radius:16px;padding:44px;display:flex;align-items:center;gap:22px;min-height:200px;">
+        <div style="width:76px;height:76px;border-radius:18px;background:{{ inkBg }};display:flex;align-items:center;justify-content:center;flex:0 0 auto;position:relative;">
+          <div style="width:48px;height:48px;border:4px solid {{ accent }};border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <div style="width:12px;height:12px;background:#2CA5C0;border-radius:50%;"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:1px;font-family:'Archivo',sans-serif;font-weight:800;font-size:40px;letter-spacing:-0.03em;line-height:1;">
+          <span style="color:{{ accent }};">Event</span><span style="color:#17262D;">Insight</span>
+        </div>
+      </div>
+      <!-- primary on dark -->
+      <div style="background:{{ inkBg }};border-radius:16px;padding:44px;display:flex;align-items:center;gap:22px;min-height:200px;">
+        <div style="width:76px;height:76px;border-radius:18px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">
+          <div style="width:48px;height:48px;border:4px solid {{ accent }};border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <div style="width:12px;height:12px;background:#2CA5C0;border-radius:50%;"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:1px;font-family:'Archivo',sans-serif;font-weight:800;font-size:40px;letter-spacing:-0.03em;line-height:1;">
+          <span style="color:{{ accent }};">Event</span><span style="color:#FFFFFF;">Insight</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- stacked + app icons row -->
+    <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:24px;margin-top:24px;">
+      <div style="background:#FFFFFF;border:1px solid #E5E3DC;border-radius:16px;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+        <div style="width:64px;height:64px;border-radius:16px;background:{{ inkBg }};display:flex;align-items:center;justify-content:center;">
+          <div style="width:40px;height:40px;border:3.5px solid {{ accent }};border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:10px;height:10px;background:#2CA5C0;border-radius:50%;"></div></div>
+        </div>
+        <div style="text-align:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-0.02em;line-height:0.95;">
+          <span style="color:{{ accent }};">Event</span><br><span style="color:#17262D;">Insight</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:#8A9499;text-transform:uppercase;">Stacked lockup</div>
+      </div>
+      <!-- app icon dark -->
+      <div style="background:#EFEDE7;border:1px solid #E5E3DC;border-radius:16px;padding:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;">
+        <div style="width:104px;height:104px;border-radius:24px;background:{{ inkBg }};box-shadow:0 10px 30px rgba(23,38,45,0.25);display:flex;align-items:center;justify-content:center;">
+          <div style="width:60px;height:60px;border:5px solid {{ accent }};border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:16px;height:16px;background:#2CA5C0;border-radius:50%;"></div></div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:#8A9499;text-transform:uppercase;">App icon</div>
+      </div>
+      <!-- app icon orange -->
+      <div style="background:#EFEDE7;border:1px solid #E5E3DC;border-radius:16px;padding:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;">
+        <div style="width:104px;height:104px;border-radius:24px;background:{{ accent }};box-shadow:0 10px 30px rgba(228,119,42,0.30);display:flex;align-items:center;justify-content:center;">
+          <div style="width:60px;height:60px;border:5px solid #FFFFFF;border-radius:50%;display:flex;align-items:center;justify-content:center;"><div style="width:16px;height:16px;background:#17262D;border-radius:50%;"></div></div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:#8A9499;text-transform:uppercase;">Icon · accent</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLOR -->
+  <div style="padding:64px 80px 0 80px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#5D6B70;">02 — Colour</div>
+    <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:30px;margin:8px 0 32px 0;">Palette</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;">
+      <div style="border-radius:14px;overflow:hidden;border:1px solid #E5E3DC;">
+        <div style="height:120px;background:#E4772A;"></div>
+        <div style="padding:14px 16px;background:#fff;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Signal Orange</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A9499;margin-top:4px;">#E4772A</div>
+          <div style="font-size:12px;color:#5D6B70;margin-top:6px;">Primary accent · "Event", CTAs, alerts</div>
+        </div>
+      </div>
+      <div style="border-radius:14px;overflow:hidden;border:1px solid #E5E3DC;">
+        <div style="height:120px;background:#17262D;"></div>
+        <div style="padding:14px 16px;background:#fff;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Ink Navy</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A9499;margin-top:4px;">#17262D</div>
+          <div style="font-size:12px;color:#5D6B70;margin-top:6px;">Text, headers, dark surfaces</div>
+        </div>
+      </div>
+      <div style="border-radius:14px;overflow:hidden;border:1px solid #E5E3DC;">
+        <div style="height:120px;background:#2CA5C0;"></div>
+        <div style="padding:14px 16px;background:#fff;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Insight Teal</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A9499;margin-top:4px;">#2CA5C0</div>
+          <div style="font-size:12px;color:#5D6B70;margin-top:6px;">Secondary · links, data, "Insight"</div>
+        </div>
+      </div>
+      <div style="border-radius:14px;overflow:hidden;border:1px solid #E5E3DC;">
+        <div style="height:120px;background:#F6F5F1;border-bottom:1px solid #E5E3DC;"></div>
+        <div style="padding:14px 16px;background:#fff;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Paper</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A9499;margin-top:4px;">#F6F5F1</div>
+          <div style="font-size:12px;color:#5D6B70;margin-top:6px;">App background, cards</div>
+        </div>
+      </div>
+      <div style="border-radius:14px;overflow:hidden;border:1px solid #E5E3DC;">
+        <div style="height:120px;background:#5D6B70;"></div>
+        <div style="padding:14px 16px;background:#fff;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Slate</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8A9499;margin-top:4px;">#5D6B70</div>
+          <div style="font-size:12px;color:#5D6B70;margin-top:6px;">Secondary text, borders</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPE -->
+  <div style="padding:64px 80px 0 80px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#5D6B70;">03 — Type</div>
+    <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:30px;margin:8px 0 32px 0;">Typography</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div style="background:#fff;border:1px solid #E5E3DC;border-radius:16px;padding:36px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;color:#8A9499;text-transform:uppercase;">Display · Archivo</div>
+        <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:56px;line-height:1;letter-spacing:-0.03em;margin:16px 0 8px 0;">Aa</div>
+        <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:22px;">Headlines, wordmark, numbers</div>
+        <div style="font-family:'Archivo',sans-serif;font-size:14px;color:#5D6B70;margin-top:10px;">500 · 600 · 700 · 800 · 900</div>
+      </div>
+      <div style="background:#fff;border:1px solid #E5E3DC;border-radius:16px;padding:36px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.2em;color:#8A9499;text-transform:uppercase;">Text · Public Sans</div>
+        <div style="font-family:'Public Sans',sans-serif;font-weight:600;font-size:56px;line-height:1;margin:16px 0 8px 0;">Aa</div>
+        <div style="font-family:'Public Sans',sans-serif;font-size:15px;line-height:1.6;color:#3A474D;">Body copy, UI labels and data tables. Clear, neutral and highly legible at small sizes — built for detailed investigative records.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP PREVIEW -->
+  <div style="padding:64px 80px 0 80px;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#5D6B70;">04 — In use</div>
+    <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:30px;margin:8px 0 32px 0;">Sample app screen</div><div style="background:#EFEDE7;border:1px solid #E5E3DC;border-radius:20px;padding:48px;display:flex;justify-content:center;">
+      <!-- phone -->
+      <div style="width: 360px; background: #F6F5F1; border-radius: 44px; padding: 11px; box-shadow: 0 24px 60px rgba(23,38,45,0.22); border: 1px solid #DED; position: relative">
+        <div style="background:#F6F5F1;border-radius:34px;overflow:hidden;height:720px;display:flex;flex-direction:column;">
+          <!-- status/header (mirrors hero) -->
+          <div style="background: {{ inkBg }}; padding: 0 22px 26px 22px; position: relative; overflow: hidden; flex: 0 0 auto; width: 338px; height: 143px">
+            
+            <div style="position:relative;z-index:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+                <span style="font-weight:500;">9:41</span>
+                <span style="display:flex;gap:8px;align-items:center;"><span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;display:inline-block;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2A3B43;display:inline-block;"></span></span>
+              </div>
+              
+              <div style="display:flex;align-items:baseline;gap:1px;font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-0.02em;line-height:1;margin-top:12px;">
+                <span style="color: {{ accent }}; font-size: 34px; text-align: left; position: static">Event</span><span style="color: #fff; font-size: 34px">Insight</span>
+              </div>
+              <div style="font-family: 'IBM Plex Mono',monospace; font-size: 8.5px; white-space: nowrap; text-transform: uppercase; color: #7FC4D6; text-align: left; line-height: 1; position: absolute; padding-left: 2.5px; width: 153px; height: 8px">By Investigations Differently</div>
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                
+                
+              </div>
+            </div>
+          <img src="assets/id-mark.png?v=3" alt="" style="position: absolute; top: 23px; width: 237px; height: 120px; object-fit: contain; pointer-events: none; left: 157px; opacity: 0.1"></div>
+          <!-- body -->
+          <div style="padding:20px 16px 16px 16px;flex:1;display:flex;flex-direction:column;">
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <div style="flex:1;background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:12px;">
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#17262D;">87<span style="font-size:13px;color:#8A9499;">%</span></div>
+                <div style="font-size:11px;color:#5D6B70;margin-top:2px;">Closed on time</div>
+              </div>
+              <div style="flex:1;background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:12px;">
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#2CA5C0;">4.2<span style="font-size:13px;color:#8A9499;">d</span></div>
+                <div style="font-size:11px;color:#5D6B70;margin-top:2px;">Avg. resolution</div>
+              </div>
+            </div>
+            <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;color:#17262D;">Recent events</div>
+            <!-- event card 1 -->
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:14px;margin-bottom:10px;border-left:4px solid #E4772A;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2041</div>
+                <div style="font-size:10px;font-weight:700;color:#E4772A;background:rgba(228,119,42,0.12);padding:2px 8px;border-radius:20px;">HIGH</div>
+              </div>
+              <div style="font-weight:600;font-size:14px;margin:6px 0 4px 0;color:#17262D;">Near-miss · loading dock</div>
+              <div style="font-size:12px;color:#5D6B70;">Investigation in progress · assigned to K. Rao</div>
+            </div>
+            <!-- event card 2 -->
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:14px;margin-bottom:10px;border-left:4px solid #2CA5C0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2038</div>
+                <div style="font-size:10px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:2px 8px;border-radius:20px;">REVIEW</div>
+              </div>
+              <div style="font-weight:600;font-size:14px;margin:6px 0 4px 0;color:#17262D;">Equipment failure · Line 3</div>
+              <div style="font-size:12px;color:#5D6B70;">Root-cause drafted · awaiting sign-off</div>
+            </div>
+            <!-- CTA -->
+            <div style="background:{{ accent }};border-radius:12px;padding:14px;text-align:center;color:#fff;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;margin-top:auto;">Log new event</div>
+          </div>
+          <!-- tab bar -->
+          <div style="display:flex;justify-content:space-around;padding:14px 0 18px 0;background:#fff;border-top:1px solid #E5E3DC;flex:0 0 auto;">
+            <div style="width:22px;height:22px;border-radius:6px;background:{{ accent }};"></div>
+            <div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div>
+            <div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div>
+            <div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:900},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#E4772A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;,&quot;options&quot;:[&quot;#E4772A&quot;,&quot;#E85D2A&quot;,&quot;#F0A500&quot;,&quot;#D4632A&quot;]},&quot;ink&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#1B2B3A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;,&quot;options&quot;:[&quot;#17262D&quot;,&quot;#12222A&quot;,&quot;#1B2B3A&quot;,&quot;#0F1E24&quot;]}}">
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#E4772A';
+    const dark = this.props.darkHero ?? true;
+    return {
+      accent,
+      inkBg: this.props.ink ?? '#17262D',
+    };
+  }
+}
+</script>
+</body>
+</html>

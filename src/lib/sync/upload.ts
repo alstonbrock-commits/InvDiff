@@ -1,7 +1,8 @@
 // Upload audio recordings and consent signatures to Storage, then trigger
 // transcription. Runs after the outbox has been drained (so the server rows
 // exist). Files are read from the device and uploaded as binary.
-import * as FileSystem from 'expo-file-system';
+// SDK 54 moved the classic file API to /legacy; these calls match it 1:1.
+import * as FileSystem from 'expo-file-system/legacy';
 import { all, getDb, localUpsert, nowIso } from '../db';
 import { supabase, callFunction } from '../supabase';
 import type { AnswerRow } from '../types';

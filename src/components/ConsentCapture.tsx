@@ -3,7 +3,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import SignatureScreen, {
   SignatureViewRef,
 } from 'react-native-signature-canvas';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Button, Card, H2, Input, P } from './ui';
 import { colors, spacing } from '@/lib/theme';
 import { saveConsent } from '@/lib/db/queries';

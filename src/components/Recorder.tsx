@@ -1,29 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Badge, Button, Row } from './ui';
 import { colors, spacing } from '@/lib/theme';
 import { saveRecordedAnswer, getAnswer } from '@/lib/db/queries';
 import type { AnswerRow } from '@/lib/types';
 import { runSync } from '@/lib/sync/SyncProvider';
 
-// Low-bitrate mono AAC — good for speech, cheap to upload and transcribe.
+// 16 kHz mono AAC — ideal input for Parakeet ASR and cheap to upload/store
+// (~70 clips per event captured offline).
 const RECORDING_OPTIONS: Audio.RecordingOptions = {
   isMeteringEnabled: false,
   android: {
     extension: '.m4a',
     outputFormat: Audio.AndroidOutputFormat.MPEG_4,
     audioEncoder: Audio.AndroidAudioEncoder.AAC,
-    sampleRate: 22050,
+    sampleRate: 16000,
     numberOfChannels: 1,
     bitRate: 32000,
   },
   ios: {
     extension: '.m4a',
     outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
-    audioQuality: Audio.IOSAudioQuality.LOW,
-    sampleRate: 22050,
+    audioQuality: Audio.IOSAudioQuality.MEDIUM,
+    sampleRate: 16000,
     numberOfChannels: 1,
     bitRate: 32000,
     linearPCMBitDepth: 16,

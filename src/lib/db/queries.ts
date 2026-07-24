@@ -9,15 +9,16 @@ import type {
 } from '../types';
 import { supabase } from '../supabase';
 
-// Fallback default questions (used offline). Server copy in default_questions.
+// The fixed question set (used offline; server copy in default_questions, which
+// an admin can edit). Facilitators cannot change these.
 export const DEFAULT_QUESTIONS: string[] = [
-  'PLACEHOLDER Q1 — What first brought you to this?',
-  'PLACEHOLDER Q2 — Walk me through a recent experience.',
-  'PLACEHOLDER Q3 — What works well for you today?',
-  'PLACEHOLDER Q4 — What is the biggest frustration?',
-  'PLACEHOLDER Q5 — If you could change one thing, what would it be?',
-  'PLACEHOLDER Q6 — What would make this significantly better?',
-  'PLACEHOLDER Q7 — Is there anything else you would like to add?',
+  'Walk me through what happened. Describe the event.',
+  'What surprised you about the event?',
+  "Could things have gone worse? And why didn't they?",
+  'When this task works well, what must go right?',
+  'What frustrates you when you do this task?',
+  'What could management better understand about this task?',
+  'How could we improve how we do this task?',
 ];
 
 async function defaultQuestionTexts(): Promise<string[]> {
