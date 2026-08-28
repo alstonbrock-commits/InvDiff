@@ -49,7 +49,6 @@ Deno.serve(async (req) => {
       system: RECS_SYSTEM,
       user: buildRecsUser(insights),
       schema: RECS_SCHEMA,
-      maxTokens: 4000,
     });
 
     const validIds = new Set(insights.map((i) => i.id));
@@ -63,7 +62,8 @@ Deno.serve(async (req) => {
     const toInsert: { insight_id: string; body: string; status: string }[] = [];
     for (const r of out.recommendations) {
       if (!validIds.has(r.insight_id)) continue;
-      for (const item of r.items) {
+      // Schema can't cap the list (maxItems unsupported) — enforce the 1-3 here.
+      for (const item of r.items.slice(0, 3)) {
         toInsert.push({ insight_id: r.insight_id, body: item, status: 'draft' });
       }
     }

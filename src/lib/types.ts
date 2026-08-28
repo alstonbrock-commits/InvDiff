@@ -1,6 +1,8 @@
 // Shared domain types. Mirror the Postgres schema and the local SQLite mirror.
 
 export type UserRole = 'admin' | 'facilitator';
+/** Enterprise seat role; null for individual accounts. */
+export type OrgRole = 'supervisor' | 'member';
 export type EventStatus = 'draft' | 'active' | 'finalised';
 export type UploadStatus = 'pending' | 'uploading' | 'uploaded' | 'failed';
 export type TranscriptStatus =
@@ -19,14 +21,35 @@ export interface Profile {
   full_name: string | null;
   role: UserRole;
   is_active: boolean;
+  job_title: string | null;
+  newsletter_opt_in: boolean;
+  newsletter_opt_in_at: string | null;
+  /** Enterprise organisation this account belongs to (null = individual). */
+  org_id: string | null;
+  org_role: OrgRole | null;
+  /** When the first-run onboarding slideshow was completed. */
+  onboarded_at: string | null;
 }
 
 export interface EventRow {
   id: string;
   title: string;
   description: string | null;
+  site: string | null;
+  occurred_at: string | null;
   owner_id: string;
   status: EventStatus;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface EventPhotoRow {
+  id: string;
+  event_id: string;
+  storage_path: string | null;
+  local_uri: string | null; // client-only column
+  position: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -50,15 +73,6 @@ export interface IntervieweeRow {
   deleted_at: string | null;
 }
 
-export interface ConsentRow {
-  id: string;
-  interviewee_id: string;
-  signature_path: string | null;
-  consent_text_version: string;
-  signed_by_name: string;
-  signed_at: string;
-}
-
 export interface AnswerRow {
   id: string;
   interviewee_id: string;
@@ -74,28 +88,21 @@ export interface AnswerRow {
   deleted_at: string | null;
 }
 
-export interface Segment {
-  start: number;
-  end: number;
-  text: string;
-  score: number | null; // null when the provider returns no confidence
-  no_speech_prob?: number; // legacy (Whisper); Parakeet omits it
-  flagged: boolean;
-}
-
 export interface TranscriptRow {
   id: string;
   answer_id: string;
   text: string | null;
   edited_text: string | null;
   status: TranscriptStatus;
-  quality_score: number | null;
-  flagged_segment_count: number;
-  segments: Segment[] | null;
   rejection_note: string | null;
   approved_by: string | null;
   approved_at: string | null;
   updated_at: string;
+}
+
+export interface SupportingExample {
+  text: string;
+  include_in_report: boolean;
 }
 
 export interface InsightRow {
@@ -104,14 +111,41 @@ export interface InsightRow {
   position: number;
   title: string;
   body: string;
+  /** System condition the insight is about (report vocabulary). */
+  theme: string | null;
+  system_significance: string | null;
+  supporting_examples: SupportingExample[] | null;
+  /** Legacy "contributing factors" — pre-report-structure events only. */
+  factors: string[] | null;
   status: InsightStatus;
   generated_by_model: string | null;
+  generated_at: string | null;
+}
+
+/** Report-level content for an event (one row), from the synthesis pass. */
+export interface EventReportRow {
+  event_id: string;
+  event_description: string | null;
+  executive_summary: string | null;
+  limitations: string | null;
+  next_steps: string[] | null;
+  data_quality_note: string | null;
+  facilitator_name: string | null;
+  interviews_reviewed: number;
+  roles_reviewed: string[] | null;
+  generated_at: string | null;
 }
 
 export interface RecommendationRow {
   id: string;
   insight_id: string;
+  /** The recommended action itself. */
   body: string;
+  risk_reduction_rationale: string | null;
+  verification_method: string | null;
+  /** Issue supported but not a specific fix — shown as "Option to consider". */
+  is_option: boolean;
+  position: number | null;
   status: InsightStatus;
 }
 

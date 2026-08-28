@@ -1,0 +1,25 @@
+{
+  "name": "event-insight-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Event Insight web portal — enterprise sign-up, seat billing, invitations, hosted legal pages.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.9.2",
+    "vite": "^6.0.0"
+  }
+}

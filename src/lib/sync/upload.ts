@@ -1,4 +1,4 @@
-// Upload audio recordings and consent signatures to Storage, then trigger
+// Upload audio recordings and event photos to Storage, then trigger
 // transcription. Runs after the outbox has been drained (so the server rows
 // exist). Files are read from the device and uploaded as binary.
 // SDK 54 moved the classic file API to /legacy; these calls match it 1:1.
@@ -49,29 +49,31 @@ export async function drainUploads(): Promise<{ audio: number; sigs: number }> {
   let audio = 0;
   let sigs = 0;
 
-  // --- Consent signatures --------------------------------------------------
-  const signatures = await all<{
-    id: string;
-    interviewee_id: string;
-    signature_path: string;
-    signature_local_uri: string;
-  }>(
-    `SELECT id, interviewee_id, signature_path, signature_local_uri
-     FROM consents WHERE signature_local_uri IS NOT NULL`,
+  // Recover rows stranded mid-upload by a crash: 'uploading' is excluded from
+  // the pickup filter below, so without this reset they'd be stuck forever.
+  // Safe because the engine is single-flight — nothing else is uploading now.
+  await db.runAsync(
+    `UPDATE answers SET upload_status='pending' WHERE upload_status='uploading'`,
   );
-  for (const s of signatures) {
+
+  // Consent signatures are no longer captured (the signing step was removed);
+  // any that were taken before that have already uploaded.
+
+  // --- Event photos --------------------------------------------------------
+  const photos = await all<{
+    id: string;
+    storage_path: string;
+    local_uri: string;
+  }>(
+    `SELECT id, storage_path, local_uri FROM event_photos
+     WHERE local_uri IS NOT NULL AND deleted_at IS NULL`,
+  );
+  for (const p of photos) {
     try {
-      await uploadFile(
-        'consent-signatures',
-        s.signature_path,
-        s.signature_local_uri,
-        'image/png',
-      );
-      // Mark uploaded locally (client-only column, no outbox needed).
-      await db.runAsync(
-        `UPDATE consents SET signature_local_uri=NULL WHERE id=?`,
-        [s.id],
-      );
+      await uploadFile('event-photos', p.storage_path, p.local_uri, 'image/jpeg');
+      await db.runAsync(`UPDATE event_photos SET local_uri=NULL WHERE id=?`, [
+        p.id,
+      ]);
       sigs++;
     } catch {
       // leave for next pass
@@ -91,15 +93,23 @@ export async function drainUploads(): Promise<{ audio: number; sigs: number }> {
         `UPDATE answers SET upload_status='uploading' WHERE id=?`,
         [a.id],
       );
-      await uploadFile('audio', a.audio_path, a.local_audio_uri, 'audio/m4a');
+      const lower = a.audio_path.toLowerCase();
+      const contentType = lower.endsWith('.wav')
+        ? 'audio/wav'
+        : lower.endsWith('.mp3')
+          ? 'audio/mpeg'
+          : 'audio/m4a';
+      await uploadFile('audio', a.audio_path, a.local_audio_uri, contentType);
 
       // Mark uploaded — this write syncs so the facilitator/admin see status.
+      // local_audio_uri is KEPT: the file is the device's 7-day fallback copy
+      // (the server copy is purged at report time); localAudioSweep deletes it.
       await localUpsert('answers', {
         id: a.id,
         interviewee_id: a.interviewee_id,
         event_question_id: a.event_question_id,
         audio_path: a.audio_path,
-        local_audio_uri: null,
+        local_audio_uri: a.local_audio_uri,
         duration_ms: a.duration_ms,
         upload_status: 'uploaded',
         recorded_at: a.recorded_at,

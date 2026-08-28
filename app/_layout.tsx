@@ -1,45 +1,43 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useFonts as useArchivo, Archivo_700Bold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo';
-import {
-  PublicSans_400Regular,
-  PublicSans_500Medium,
-  PublicSans_600SemiBold,
-  PublicSans_700Bold,
-} from '@expo-google-fonts/public-sans';
-import { IBMPlexMono_400Regular, IBMPlexMono_500Medium } from '@expo-google-fonts/ibm-plex-mono';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import { AuthProvider } from '@/lib/auth';
+import { EntitlementProvider } from '@/lib/entitlement';
 import { SyncProvider } from '@/lib/sync/SyncProvider';
-import { colors, fonts } from '@/lib/theme';
+import { DialogHost } from '@/components';
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, staleTime: 15_000 } },
-});
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [fontsLoaded] = useArchivo({
-    Archivo_700Bold,
-    Archivo_800ExtraBold,
-    PublicSans_400Regular,
-    PublicSans_500Medium,
-    PublicSans_600SemiBold,
-    PublicSans_700Bold,
-    IBMPlexMono_400Regular,
-    IBMPlexMono_500Medium,
+  // Static weights ship in the @expo-google-fonts packages. google/fonts itself only
+  // publishes variable TTFs for these families, which Android can't select instances
+  // from by fontFamily alone.
+  const [fontsLoaded, fontError] = useFonts({
+    'Archivo-700': require('@expo-google-fonts/archivo/700Bold/Archivo_700Bold.ttf'),
+    'Archivo-800': require('@expo-google-fonts/archivo/800ExtraBold/Archivo_800ExtraBold.ttf'),
+    'PublicSans-400': require('@expo-google-fonts/public-sans/400Regular/PublicSans_400Regular.ttf'),
+    'PublicSans-500': require('@expo-google-fonts/public-sans/500Medium/PublicSans_500Medium.ttf'),
+    'PublicSans-600': require('@expo-google-fonts/public-sans/600SemiBold/PublicSans_600SemiBold.ttf'),
+    'PublicSans-700': require('@expo-google-fonts/public-sans/700Bold/PublicSans_700Bold.ttf'),
+    'IBMPlexMono-400': require('@expo-google-fonts/ibm-plex-mono/400Regular/IBMPlexMono_400Regular.ttf'),
+    'IBMPlexMono-500': require('@expo-google-fonts/ibm-plex-mono/500Medium/IBMPlexMono_500Medium.ttf'),
   });
 
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.bg, justifyContent: 'center' }}>
-        <ActivityIndicator color={colors.teal} />
-      </View>
-    );
+  React.useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
   }
 
   return (
@@ -47,36 +45,29 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
+            <EntitlementProvider>
             <SyncProvider>
-              <StatusBar style="dark" />
-              <Stack
-                screenOptions={{
-                  headerStyle: { backgroundColor: colors.navy },
-                  headerTintColor: colors.textOnNavy,
-                  headerTitleStyle: { fontFamily: fonts.displayBold, color: colors.textOnNavy },
-                  headerShadowVisible: false,
-                  contentStyle: { backgroundColor: colors.bg },
-                }}
-              >
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen name="events/index" options={{ headerShown: false }} />
-                <Stack.Screen name="events/new" options={{ title: 'New Event' }} />
-                <Stack.Screen name="events/[id]/index" options={{ title: 'Event' }} />
-                <Stack.Screen name="events/[id]/questions" options={{ title: 'Questions' }} />
-                <Stack.Screen name="events/[id]/transcripts" options={{ title: 'Review transcripts' }} />
-                <Stack.Screen name="events/[id]/insights" options={{ title: 'Insights' }} />
-                <Stack.Screen name="events/[id]/export" options={{ title: 'Export' }} />
-                <Stack.Screen name="interviewee/new" options={{ title: 'Add Interviewee' }} />
-                <Stack.Screen name="interviewee/[id]" options={{ title: 'Interview' }} />
-                <Stack.Screen name="transcript/[id]" options={{ title: 'Transcript' }} />
-                <Stack.Screen name="admin/index" options={{ headerShown: false }} />
-                <Stack.Screen name="admin/questions" options={{ title: 'Questions' }} />
-                <Stack.Screen name="admin/approvals" options={{ title: 'Approvals' }} />
-                <Stack.Screen name="admin/users" options={{ title: 'Users' }} />
-                <Stack.Screen name="admin/settings" options={{ title: 'Settings' }} />
+              <StatusBar style="auto" />
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="(admin)" />
+                {/* Interstitials between sign-in and the app — no back gesture. */}
+                <Stack.Screen name="paywall" options={{ gestureEnabled: false }} />
+                <Stack.Screen name="subscription-inactive" options={{ gestureEnabled: false }} />
+                <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+                <Stack.Screen name="complete-profile" options={{ gestureEnabled: false }} />
+                <Stack.Screen
+                  name="insight-detail"
+                  options={{
+                    presentation: 'transparentModal',
+                    animation: 'slide_from_bottom',
+                  }}
+                />
               </Stack>
+              <DialogHost />
             </SyncProvider>
+            </EntitlementProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
