@@ -8,6 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: APP_NAME,
   slug: 'interview-insights',
+  owner: 'brock_alston',
   version: '1.0.0',
   orientation: 'portrait',
   scheme: 'interviewinsights',
@@ -110,7 +111,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     rcIosKey: process.env.EXPO_PUBLIC_RC_IOS_KEY ?? '',
     rcAndroidKey: process.env.EXPO_PUBLIC_RC_ANDROID_KEY ?? '',
     eas: {
-      projectId: process.env.EAS_PROJECT_ID ?? '',
+      projectId: process.env.EAS_PROJECT_ID ?? '3f9ea4e1-0fae-4db4-8a4d-519ea7ac9286',
     },
   },
 });
