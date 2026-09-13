@@ -43,7 +43,7 @@ supabase functions deploy delete-account notify-admin generate-insights transcri
 2. **App Store Connect**: Paid Apps agreement + banking; subscription group + `ei_individual_monthly` at **A$19.99, no introductory offer** (the free report replaces the trial); sandbox testers; Terms/Privacy URLs from the website.
 3. **Play Console**: payments profile; subscription `ei_individual_monthly` base plan monthly **A$19.99, no free-trial offer**; license testers; Data safety deletion URL.
 4. **RevenueCat**: entitlement `individual`, offering `default` (monthly package), webhook + keys (`EXPO_PUBLIC_RC_IOS_KEY` / `EXPO_PUBLIC_RC_ANDROID_KEY`).
-5. **Website** (`web/`): static Vite site — `/`, `/terms`, `/privacy`, `/account/delete`, `/forgot-password` only. Host at `app.eventinsights.com.au`; env `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, store URLs when live.
+5. **Website** (`web/`): static Vite site — `/`, `/terms`, `/privacy`, `/account/delete`, `/forgot-password` only. Host at `eventinsight.baprojects.com.au`; env `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, store URLs when live.
 6. Resend domain verification (welcome + admin-notification emails; nothing launch-blocking depends on it any more).
 7. Comp existing testers: `insert into subscriptions (user_id, provider, status, access_until) values ('<uid>', 'manual', 'manual', '2099-01-01');`
 

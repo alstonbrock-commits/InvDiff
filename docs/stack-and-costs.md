@@ -13,7 +13,7 @@
 | **Expo / EAS** | React Native framework, dev builds, store distribution | `app.config.ts`, `package.json` | Free: 15 Android + 15 iOS builds/mo, OTA updates to 1,000 MAU. Production: $199/mo + usage (only needed at real scale) |
 | **Android speech recognition** | Live caption preview while recording (on-device/Google service) | `src/lib/liveCaptions.ts` (expo-speech-recognition) | Free |
 | **Google Fonts** (bundled) | Archivo, Public Sans, IBM Plex Mono — shipped in the app binary | `package.json` | Free |
-| **Domain** — `eventinsights.com.au` | Registered 24 Aug 2026. DNS, email (SPF/DKIM via Resend), and in-app link swap are pending follow-ups | — | ~AU$15–35/yr typical .com.au renewal |
+| **Domain** — `eventinsights.com.au` | Registered 24 Aug 2026 by the client. Web presence now lives at `eventinsight.baprojects.com.au` (Brock's umbrella domain, one subdomain per project); eventinsights.com.au is optional — could later redirect here | — | ~AU$15–35/yr typical .com.au renewal |
 
 **Data residency note:** app data rests in Sydney (Supabase). AI processing (Together AI, Anthropic) occurs in the US — disclosed in the privacy policy and pre-recording consent (Privacy Act APP 8). See `docs/privacy-and-store.md`.
 
@@ -87,5 +87,5 @@ The remaining meaningful lever is **synthesis model choice** — Opus 4.8 is ~$2
 ## Pending ops checklist
 
 - [ ] Supabase dashboard → Authentication → Email Templates → *Reset Password*: include `{{ .Token }}` (6-digit code) — required for the in-app forgot-password flow (local template: `supabase/templates/recovery.html`)
-- [ ] eventinsights.com.au: DNS records (SPF/DKIM) in Resend, then Supabase custom SMTP so auth emails send from the business domain
+- [ ] Sending domain: verify `baprojects.com.au` (or the client's `eventinsights.com.au`) in Resend (SPF/DKIM), then Supabase custom SMTP so auth emails send from a real domain; site DNS: CNAME `eventinsight.baprojects.com.au` → static host
 - [ ] Swap in-app website/support links to the new domain when the client confirms
