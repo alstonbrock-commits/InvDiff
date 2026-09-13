@@ -107,20 +107,10 @@ CREATE INDEX IF NOT EXISTS idx_photos_event ON event_photos(event_id);
 DELETE FROM sync_outbox WHERE table_name = 'consents';
 DROP TABLE IF EXISTS consents;
 `,
-  // 3 — enterprise: the organisation's members (server view team_members,
-  // migration 0029). Read-only mirror so the supervisor feed can name whose
-  // event each card is, offline. RLS scopes the pull: supervisors get the
-  // whole team, members get themselves + their supervisor.
+  // 3 — the enterprise tier was removed before launch; clean up the mirror
+  // table on any dev device that briefly had it.
   `
-CREATE TABLE IF NOT EXISTS team_members (
-  id TEXT PRIMARY KEY,
-  full_name TEXT,
-  email TEXT,
-  job_title TEXT,
-  org_role TEXT,
-  is_active INTEGER NOT NULL DEFAULT 1,
-  updated_at TEXT NOT NULL
-);
+DROP TABLE IF EXISTS team_members;
 `,
 ];
 
@@ -132,6 +122,4 @@ export const SERVER_COLUMNS: Record<string, string[]> = {
   interviewees: ['id', 'event_id', 'name', 'role_or_segment', 'updated_at', 'deleted_at'],
   answers: ['id', 'interviewee_id', 'event_question_id', 'audio_path', 'duration_ms', 'upload_status', 'recorded_at', 'updated_at', 'deleted_at'],
   event_photos: ['id', 'event_id', 'storage_path', 'position', 'created_at', 'updated_at', 'deleted_at'],
-  // Pull-only (a view on the server); never written from the device.
-  team_members: ['id', 'full_name', 'email', 'job_title', 'org_role', 'is_active', 'updated_at'],
 };

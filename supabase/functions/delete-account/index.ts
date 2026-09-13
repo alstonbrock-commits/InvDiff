@@ -1,20 +1,17 @@
 // delete-account: the in-app / web "delete my account" action (App Store
 // 5.1.1(v), Google Play account-deletion policy).
 //
-//   Individual (no organisation): every event they own is deleted — Storage
-//     objects via the Storage API (SQL cannot touch storage.objects), then the
-//     rows (cascade) — and the profile is scrubbed.
-//   Enterprise member: events are organisation records (Terms §5) and stay;
-//     the profile is scrubbed and detached from sign-in.
-//   Enterprise supervisor: refused while the organisation's subscription is
-//     live (cancel it first); a lapsed organisation is closed.
+// The account's events are deleted — Storage objects via the Storage API
+// (SQL cannot touch storage.objects), then the rows (cascade) — and the
+// profile is scrubbed. Store subscriptions cannot be cancelled by us: the
+// confirm dialog tells the user to cancel in the App Store / Google Play.
 //
 // The auth user is deleted last. Migration 0030 dropped the profiles→auth
-// cascade so the scrubbed profile can remain for the rows that reference it.
+// cascade so the scrubbed profile can remain for the rows that reference it
+// (audit_log and friends).
 import { handleOptions, json } from '../_shared/cors.ts';
 import { requireUser, serviceClient } from '../_shared/supabase.ts';
-import { audit } from '../_shared/org.ts';
-import { getStripe } from '../_shared/stripe.ts';
+import { audit } from '../_shared/audit.ts';
 
 const BUCKETS = ['audio', 'event-photos', 'exports'];
 
@@ -33,65 +30,31 @@ Deno.serve(async (req) => {
     const db = serviceClient();
     const { data: prof } = await db
       .from('profiles')
-      .select('id, email, role, org_id, org_role')
+      .select('id, email, role')
       .eq('id', user.id)
       .single();
     if (!prof) return json({ error: 'profile not found' }, 404);
     if (prof.role === 'admin') return json({ error: 'admin_cannot_self_delete' }, 403);
 
-    // Supervisors: the organisation's money and members come first.
-    if (prof.org_role === 'supervisor' && prof.org_id) {
-      const { data: org } = await db
-        .from('organisations')
-        .select('id, status, stripe_subscription_id')
-        .eq('id', prof.org_id)
-        .single();
-      if (org && ['trialing', 'active', 'past_due'].includes(org.status)) {
-        return json({ error: 'cancel_subscription_first' }, 409);
-      }
-      if (org) {
-        await db
-          .from('organisations')
-          .update({ status: 'closed', access_until: new Date().toISOString() })
-          .eq('id', org.id);
-      }
-    }
-
-    // Individual Stripe subscription: stop the billing. Store subscriptions
-    // can only be cancelled by the user in the store (we tell them so).
-    const { data: sub } = await db
-      .from('subscriptions')
-      .select('provider, provider_ref')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    if (sub?.provider === 'stripe' && sub.provider_ref) {
-      try {
-        await getStripe().subscriptions.cancel(sub.provider_ref);
-      } catch (e) {
-        console.error('stripe cancel failed', String(e));
-      }
-    }
     await db.from('subscriptions').delete().eq('user_id', user.id);
 
-    // Individuals take their data with them.
-    let eventsDeleted = 0;
-    if (!prof.org_id) {
-      const { data: events } = await db.from('events').select('id').eq('owner_id', user.id);
-      for (const ev of events ?? []) {
-        await purgeEventStorage(db, ev.id);
-      }
-      const { count, error: evErr } = await db
-        .from('events')
-        .delete({ count: 'exact' })
-        .eq('owner_id', user.id);
-      // Never scrub the profile while events still reference it.
-      if (evErr) return json({ error: `events delete: ${evErr.message}` }, 500);
-      eventsDeleted = count ?? 0;
-      await db.from('admin_notifications').delete().eq('facilitator_id', user.id);
+    // The account takes its data with it.
+    const { data: events } = await db.from('events').select('id').eq('owner_id', user.id);
+    for (const ev of events ?? []) {
+      await purgeEventStorage(db, ev.id);
     }
+    const { count, error: evErr } = await db
+      .from('events')
+      .delete({ count: 'exact' })
+      .eq('owner_id', user.id);
+    // Never scrub the profile while events still reference it.
+    if (evErr) return json({ error: `events delete: ${evErr.message}` }, 500);
+    const eventsDeleted = count ?? 0;
+    await db.from('admin_notifications').delete().eq('facilitator_id', user.id);
 
-    // Scrub the profile: nothing personal remains, the row stays for the
-    // organisation's records (and for audit/export references).
+    // Scrub the profile: nothing personal remains; the row stays for the
+    // audit/export references. (The on_auth_user_deleted trigger repeats this
+    // when the auth user goes — belt and braces.)
     await db
       .from('profiles')
       .update({
@@ -101,14 +64,12 @@ Deno.serve(async (req) => {
         newsletter_opt_in: false,
         newsletter_opt_in_at: null,
         is_active: false,
-        org_role: null,
         onboarded_at: null,
         deleted_at: new Date().toISOString(),
       })
       .eq('id', user.id);
 
     await audit(db, user.id, 'delete_account', 'profile', user.id, {
-      org_id: prof.org_id,
       events_deleted: eventsDeleted,
     });
 

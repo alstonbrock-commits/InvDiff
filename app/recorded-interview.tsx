@@ -5,11 +5,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Eyebrow, alertDialog } from '@/components';
-import { useAuth } from '@/lib/auth';
 import { useFocusData } from '@/lib/hooks';
 import {
   displayRef,
-  getEvent,
   getInterviewee,
   listAnswersForInterviewee,
   listInterviewees,
@@ -66,19 +64,6 @@ export default function RecordedInterview() {
     eventId: string;
     intervieweeId: string;
   }>();
-  const { session } = useAuth();
-
-  // Only the event's owner records. A supervisor viewing a team member's
-  // event cannot reach this screen through the UI; if they land here anyway
-  // (stale link), send them back to the read-only roster.
-  useEffect(() => {
-    if (!eventId || !session) return;
-    void getEvent(eventId).then((ev) => {
-      if (ev && ev.owner_id !== session.user.id) {
-        router.replace({ pathname: '/select-interviewee', params: { eventId } });
-      }
-    });
-  }, [eventId, session, router]);
 
   const [questionIndex, setQuestionIndex] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);

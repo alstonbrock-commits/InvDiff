@@ -1,22 +1,20 @@
 // The one place that decides where a signed-in user belongs. app/index.tsx
 // follows it on launch, the (tabs) layout follows it while the app is open,
-// and each interstitial screen (paywall, onboarding, …) bounces back to "/"
-// the moment it no longer applies.
+// and each interstitial screen (onboarding, …) bounces back to "/" the moment
+// it no longer applies.
 //
-// Order matters:
-//   login → admin console → complete profile → plan gate → onboarding → app
-// The admin console is exempt from plans and onboarding. Profile completion
-// comes before the paywall so a Google/Apple sign-up with no job title fills
-// it in before being asked to pay.
+// Order: login → admin console → complete profile → deactivated? → onboarding
+// → app. There is deliberately NO paywall in this chain: everyone gets into
+// the app (the first report is free), and once the free report is used the
+// app runs in view-only mode — the subscribe screen is opened on demand from
+// the locked actions and the Account tab.
 import { useAuth } from './auth';
-import { useEntitlement } from './entitlement';
 
 export const ROUTES = {
   login: '/(auth)/login',
   admin: '/(admin)/(dashboard)',
   completeProfile: '/complete-profile',
-  paywall: '/paywall',
-  inactive: '/subscription-inactive',
+  inactive: '/account-inactive',
   onboarding: '/onboarding',
   app: '/(tabs)/(dashboard)',
 } as const;
@@ -33,7 +31,6 @@ export interface Gate {
 
 export function useGate(): Gate {
   const { session, profile, loading: authLoading, profileLoading, onboarded } = useAuth();
-  const ent = useEntitlement();
 
   if (authLoading) return { target: null, loading: true, noProfile: false };
   if (!session) return { target: ROUTES.login, loading: false, noProfile: false };
@@ -51,15 +48,8 @@ export function useGate(): Gate {
     return { target: ROUTES.completeProfile, loading: false, noProfile: false };
   }
 
-  if (ent.loading) return { target: null, loading: true, noProfile: false };
-
-  if (!ent.active || !profile.is_active) {
-    const orgAccount = profile.org_id !== null || ent.entitlement?.kind === 'org';
-    return {
-      target: orgAccount || !profile.is_active ? ROUTES.inactive : ROUTES.paywall,
-      loading: false,
-      noProfile: false,
-    };
+  if (!profile.is_active) {
+    return { target: ROUTES.inactive, loading: false, noProfile: false };
   }
 
   if (!onboarded) return { target: ROUTES.onboarding, loading: false, noProfile: false };

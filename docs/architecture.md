@@ -6,11 +6,8 @@
 - **facilitator** — owns their events end to end. One facilitator per event
   (`events.owner_id`), so there is exactly one writer per row and last-write-wins
   is correct rather than a compromise.
-- **Enterprise organisations (Aug 2026)** — a facilitator may also be an
-  organisation's `supervisor` or `member` (`profiles.org_id` / `org_role`).
-  Supervisors get read-only visibility of every member's events through
-  `can_read_event()`; write policies are unchanged. Plans, entitlement, seats,
-  invitations and the web portal are described in `billing-and-enterprise.md`.
+- **Billing (Sep 2026)** — solo subscription via Apple/Google in-app purchase,
+  with one free report per account before subscribing; see `billing.md`.
 
 ## Offline capture path (the only thing that must work offline)
 Events, questions, interviewees, and answers are written to **local

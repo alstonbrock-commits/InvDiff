@@ -295,6 +295,15 @@ async function runInsights(
         await db.from('recommendations').insert(toInsert);
       }
 
+      // First report generated → the free credit is spent. Stamped for every
+      // account (subscribers included): the column means "has generated at
+      // least one report", which is what the entitlement check reads.
+      await db
+        .from('profiles')
+        .update({ free_report_used_at: new Date().toISOString() })
+        .eq('id', ev.owner_id)
+        .is('free_report_used_at', null);
+
       if (jobId) {
         await db
           .from('ai_jobs')

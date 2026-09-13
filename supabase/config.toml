@@ -48,17 +48,11 @@ file_size_limit = "50MiB"
 [edge_runtime]
 enabled = true
 
-# Functions called by third parties (webhooks, cron) rather than the app — no
-# Supabase JWT on the request. Each guards itself: the webhooks verify the
-# provider's signature / shared secret, purge-expired-audio checks a header.
+# Functions called by third parties (webhook, cron) rather than the app — no
+# Supabase JWT on the request. Each guards itself: the webhook checks its
+# shared secret, purge-expired-audio checks a header.
 # Deploy with `supabase functions deploy <name> --no-verify-jwt` as well.
 [functions.revenuecat-webhook]
-verify_jwt = false
-
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.org-accept-invite]
 verify_jwt = false
 
 [functions.purge-expired-audio]

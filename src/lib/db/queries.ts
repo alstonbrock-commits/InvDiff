@@ -110,43 +110,6 @@ export async function listMyEventsWithCounts(
   );
 }
 
-// Everything the signed-in user may see: their own events, plus — for an
-// enterprise supervisor — every active or removed member's events (RLS has
-// already decided what reached the local mirror; includeTeam just decides
-// whether to show it). owner_name comes from the team_members mirror.
-export interface VisibleEventItem extends EventListItem {
-  owner_name: string | null;
-  is_mine: boolean;
-}
-
-export async function listVisibleEventsWithCounts(
-  userId: string,
-  includeTeam: boolean,
-): Promise<VisibleEventItem[]> {
-  const rows = await all<Omit<VisibleEventItem, 'is_mine'> & { is_mine: number }>(
-    `SELECT e.*,
-       (SELECT COUNT(*) FROM interviewees i
-         WHERE i.event_id=e.id AND i.deleted_at IS NULL) AS interviewee_count,
-       COALESCE(NULLIF(tm.full_name, ''), tm.email) AS owner_name,
-       (e.owner_id = ?) AS is_mine
-     FROM events e
-     LEFT JOIN team_members tm ON tm.id = e.owner_id
-     WHERE e.deleted_at IS NULL AND (e.owner_id = ? OR ?)
-     ORDER BY COALESCE(e.occurred_at, e.created_at) DESC`,
-    [userId, userId, includeTeam ? 1 : 0],
-  );
-  return rows.map((r) => ({ ...r, is_mine: !!r.is_mine }));
-}
-
-// Name of a team member from the local mirror (null for individuals / unknown).
-export async function teamMemberName(userId: string): Promise<string | null> {
-  const row = await first<{ name: string | null }>(
-    `SELECT COALESCE(NULLIF(full_name, ''), email) AS name FROM team_members WHERE id=?`,
-    [userId],
-  );
-  return row?.name ?? null;
-}
-
 // Dashboard tiles: finalised = "completed", active = "needing review".
 export async function eventStatusCounts(
   ownerId: string,

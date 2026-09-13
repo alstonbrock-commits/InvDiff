@@ -49,74 +49,47 @@ export default function Account() {
 
   const name = profile?.full_name || profile?.email || '';
   // Real job title when the account has one; role-derived label otherwise.
-  // Enterprise supervisors are labelled as such regardless of job title.
   const roleLabel = profile
-    ? profile.org_role === 'supervisor'
-      ? `Supervisor${profile.job_title ? ` · ${profile.job_title}` : ''}`
-      : profile.job_title || (ROLE_LABEL[profile.role] ?? profile.role)
+    ? profile.job_title || (ROLE_LABEL[profile.role] ?? profile.role)
     : '';
 
-  // Plan card rows, from the entitlement the gate already loaded.
+  // Plan card rows, from the entitlement.
+  const entl = ent.entitlement;
   const planRows = (() => {
-    const e = ent.entitlement;
-    if (!e || e.kind === 'admin') return null;
+    if (!entl || entl.kind === 'admin') return null;
     const rows: { label: string; value: string }[] = [];
-    if (e.kind === 'org' && e.org) {
-      rows.push({ label: 'Plan', value: `Enterprise · ${e.org.name}` });
+    if (entl.kind === 'individual' && entl.individual) {
+      const i = entl.individual;
+      rows.push({ label: 'Plan', value: 'Event Insight subscription' });
       rows.push({
         label: 'Status',
         value:
-          e.org.status === 'active'
-            ? `Active${fmtDate(e.org.current_period_end) ? ` · renews ${fmtDate(e.org.current_period_end)}` : ''}`
-            : e.org.status === 'past_due'
-              ? 'Payment issue'
-              : e.org.status === 'canceled'
-                ? `Cancelled${fmtDate(e.access_until) ? ` · access until ${fmtDate(e.access_until)}` : ''}`
-                : e.org.status === 'pending'
-                  ? 'Set-up incomplete'
-                  : e.org.status,
-      });
-      if (profile?.org_role === 'supervisor') {
-        rows.push({ label: 'Seats', value: `${e.org.seats_used} of ${e.org.seat_count} in use` });
-      }
-    } else if (e.kind === 'individual' && e.individual) {
-      const i = e.individual;
-      rows.push({ label: 'Plan', value: 'Individual' });
-      rows.push({
-        label: 'Status',
-        value:
-          i.status === 'trialing'
-            ? `Free trial${fmtDate(i.trial_end) ? ` · ends ${fmtDate(i.trial_end)}` : ''}`
-            : i.status === 'active'
-              ? `Active${fmtDate(i.current_period_end) ? ` · renews ${fmtDate(i.current_period_end)}` : ''}`
-              : i.status === 'canceled'
-                ? `Cancelled${fmtDate(e.access_until) ? ` · access until ${fmtDate(e.access_until)}` : ''}`
-                : i.status === 'billing_issue'
-                  ? 'Payment issue — check your store subscription'
-                  : i.status === 'manual'
-                    ? 'Complimentary'
-                    : i.status,
+          i.status === 'active'
+            ? `Active${fmtDate(i.current_period_end) ? ` · renews ${fmtDate(i.current_period_end)}` : ''}`
+            : i.status === 'canceled'
+              ? `Cancelled${fmtDate(entl.access_until) ? ` · access until ${fmtDate(entl.access_until)}` : ''}`
+              : i.status === 'billing_issue'
+                ? 'Payment issue — check your store subscription'
+                : i.status === 'manual'
+                  ? 'Complimentary'
+                  : i.status,
       });
       rows.push({
         label: 'Billed by',
-        value:
-          i.provider === 'apple'
-            ? 'Apple (App Store)'
-            : i.provider === 'google'
-              ? 'Google Play'
-              : i.provider === 'stripe'
-                ? 'Investigations Differently'
-                : '—',
+        value: i.provider === 'apple' ? 'Apple (App Store)' : i.provider === 'google' ? 'Google Play' : '—',
       });
+    } else if (entl.kind === 'free') {
+      rows.push({ label: 'Plan', value: 'Free' });
+      rows.push({ label: 'Status', value: 'First insight report free — not used yet' });
     } else {
-      rows.push({ label: 'Plan', value: 'No active plan' });
+      rows.push({ label: 'Plan', value: 'Free' });
+      rows.push({ label: 'Status', value: 'Free report used' });
     }
     return rows;
   })();
   const storeBilled =
-    ent.entitlement?.kind === 'individual' &&
-    (ent.entitlement.individual?.provider === 'apple' ||
-      ent.entitlement.individual?.provider === 'google');
+    entl?.kind === 'individual' &&
+    (entl.individual?.provider === 'apple' || entl.individual?.provider === 'google');
   const version = Constants.expoConfig?.version ?? '1.0';
 
   // Optimistic so the tick responds instantly; reverts if the write fails.
@@ -165,13 +138,10 @@ export default function Account() {
     }
   };
   const confirmDelete = () => {
-    const member = !!profile?.org_id;
     showDialog({
       variant: 'confirm',
       title: 'Delete your account?',
-      body: member
-        ? "Your sign-in and personal details are removed permanently. The events you recorded stay with your organisation. This can't be undone."
-        : `Your account, events, recordings, transcripts and reports are deleted permanently. This can't be undone.${storeBilled ? ' Cancel your store subscription separately — deleting the account does not stop store billing.' : ''}`,
+      body: `Your account, events, recordings, transcripts and reports are deleted permanently. This can't be undone.${storeBilled ? ' Cancel your store subscription separately — deleting the account does not stop store billing.' : ''}`,
       cancelLabel: 'Keep my account',
       confirmLabel: 'Delete',
       onConfirm: () => void deleteAccount(),
@@ -244,6 +214,11 @@ export default function Account() {
           <>
             <Eyebrow style={{ marginTop: 4 }}>Subscription</Eyebrow>
             <ListCard variant="data" rows={planRows} />
+            {!ent.active && (
+              <Button variant="primary" size="sm" fullWidth onPress={() => router.push('/paywall')}>
+                Subscribe — unlimited reports
+              </Button>
+            )}
             {storeBilled && (
               <Button
                 variant="secondary"

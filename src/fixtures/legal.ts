@@ -10,22 +10,22 @@ export interface LegalSection {
   body: string;
 }
 
-export const LEGAL_UPDATED = '28 August 2026';
+export const LEGAL_UPDATED = '13 September 2026';
 
-// TODO(client): legal entity, ABN and address for the Terms, the Privacy
-// policy and the Stripe tax-invoice header.
+// TODO(client): legal entity, ABN and address for the Terms and the Privacy
+// policy.
 const ENTITY = 'Investigations Differently';
 
 export const TERMS_SECTIONS: LegalSection[] = [
   {
     heading: '1 · About these terms',
     body:
-      `These terms govern the use of the Event Insight app and web portal, provided by ${ENTITY} ("we", "us"). By creating an account, signing in or using the app you agree to these terms on your own behalf and, where applicable, on behalf of the organisation that authorised your access. Last updated ${LEGAL_UPDATED} (draft).`,
+      `These terms govern the use of the Event Insight app and website, provided by ${ENTITY} ("we", "us"). By creating an account, signing in or using the app you agree to these terms. Last updated ${LEGAL_UPDATED} (draft).`,
   },
   {
     heading: '2 · Who may use the app',
     body:
-      'The app is intended for supervisors, investigators and facilitators conducting workplace event reviews, and for the organisations they work for. You must be at least 18, provide accurate account information, keep your sign-in credentials secure, and not share your account. We may suspend accounts that are compromised or misused.',
+      'The app is intended for supervisors, investigators and facilitators conducting workplace event reviews. You must be at least 18, provide accurate account information, keep your sign-in credentials secure, and not share your account. We may suspend accounts that are compromised or misused.',
   },
   {
     heading: '3 · Recordings & consent',
@@ -40,57 +40,47 @@ export const TERMS_SECTIONS: LegalSection[] = [
   {
     heading: '5 · Your content',
     body:
-      'You (for an Individual plan) or your organisation (for an Enterprise plan) retain ownership of the events, recordings, transcripts, photos and reports created through the app. You grant us the rights needed to store and process that content solely to provide the service, including processing by the third-party AI services described in the Privacy policy.',
+      'You retain ownership of the events, recordings, transcripts, photos and reports created through the app. You grant us the rights needed to store and process that content solely to provide the service, including processing by the third-party AI services described in the Privacy policy.',
   },
   {
-    heading: '6 · Plans, fees & free trial',
+    heading: '6 · Plan, fees & the free first report',
     body:
-      'Event Insight is a paid subscription. Individual plan: one user, A$29.99 per month including GST, with a 7-day free trial for new subscribers (one trial per person). Enterprise plan: A$19.99 per user per month including GST, for a minimum of three seats; the supervisor who sets up the organisation occupies one seat. Prices are in Australian dollars and may change with at least 30 days’ notice; a change takes effect from your next renewal after the notice.',
+      'Event Insight is a paid subscription: A$19.99 per month including GST, for one user. Every new account may generate one insight report free of charge before subscribing; after that free report, recording new interviews and generating reports require an active subscription, while everything already captured — events, transcripts and the free report — remains viewable and shareable in the app. Prices are in Australian dollars, are shown in your app store’s local currency at purchase, and may change with at least 30 days’ notice; a change takes effect from your next renewal after the notice.',
   },
   {
     heading: '7 · Billing, renewal & cancellation',
     body:
-      'Individual subscriptions bought in the app are billed by Apple (App Store) or Google (Google Play) to the account you used, renew automatically every month unless cancelled at least 24 hours before the end of the current period, and are managed or cancelled through your device’s subscription settings. Subscriptions bought on our website, including all Enterprise plans, are billed monthly by card through our payment processor (Stripe), renew automatically until cancelled, and can be cancelled from your online account; access continues until the end of the period already paid for. Enterprise seat changes take effect immediately and are pro-rated on the next invoice. If a payment fails, access continues for a short grace period while payment is retried, after which the subscription is suspended until it is paid.',
+      'Subscriptions are bought in the app and billed by Apple (App Store) or Google (Google Play) to the account you used. They renew automatically every month unless cancelled at least 24 hours before the end of the current period, and are managed or cancelled through your device’s subscription settings — not through us. Access continues until the end of the period already paid for.',
   },
   {
-    heading: '8 · Refunds',
+    heading: '8 · Refunds & receipts',
     body:
-      'Refunds for purchases made through the App Store or Google Play are handled by Apple or Google under their own policies. For subscriptions billed by us, we do not refund partial periods after a cancellation, except where the Australian Consumer Law or another law requires it. Nothing in these terms limits your rights under the Australian Consumer Law.',
+      'Apple and Google are the merchants of record for all purchases: they collect the payment and GST, issue the receipt and tax invoice for every payment, and handle refunds under their own policies. We cannot issue separate tax invoices or process refunds for store purchases. Nothing in these terms limits your rights under the Australian Consumer Law.',
   },
   {
-    heading: '9 · Tax invoices',
+    heading: '9 · Deleting your account',
     body:
-      `For subscriptions billed by us, a tax invoice is emailed automatically for every payment and is also available from your online account. For subscriptions bought through the App Store or Google Play, Apple or Google is the merchant of record: they collect the payment and GST and issue the receipt and tax invoice, and ${ENTITY} cannot issue a separate tax invoice for those payments.`,
+      'You can delete your account from the Account tab in the app or from our website. Deleting your account permanently deletes your events, recordings, transcripts and reports. Deleting your account does not cancel your subscription — cancel it in the App Store or Google Play, or you will continue to be charged.',
   },
   {
-    heading: '10 · Enterprise accounts & supervisors',
+    heading: '10 · Acceptable use',
     body:
-      'An Enterprise organisation is created and paid for by a supervisor, who invites team members to its seats. The supervisor can see every event, interview transcript, insight and report recorded by any member of the organisation, can add and remove members, and is responsible for the organisation’s use of the app and for ensuring members understand this visibility. Members see only their own work. When a supervisor removes a member, that member can no longer sign in and their seat is released; the events they recorded remain with the organisation. If the organisation’s subscription lapses, members cannot use the app until it is restored, but their data is retained as described in the Privacy policy.',
+      'You must not use the app for any unlawful purpose, attempt to access data belonging to another account, interfere with the operation of the service, or upload content that is malicious or that you do not have the right to record or share.',
   },
   {
-    heading: '11 · Deleting your account',
-    body:
-      'You can delete your account from the Account tab in the app or from our website. Deleting an Individual account permanently deletes your events, recordings, transcripts and reports. Deleting an Enterprise member’s account removes your personal details and sign-in; the events you recorded remain with your organisation, which owns them. A supervisor must cancel the organisation’s subscription before deleting their account. Deleting your account does not cancel a subscription bought through the App Store or Google Play — cancel that in the store.',
-  },
-  {
-    heading: '12 · Acceptable use',
-    body:
-      'You must not use the app for any unlawful purpose, attempt to access data belonging to another organisation or account, interfere with the operation of the service, or upload content that is malicious or that you do not have the right to record or share.',
-  },
-  {
-    heading: '13 · Availability',
+    heading: '11 · Availability',
     body:
       'The app is designed to work offline and to sync when a connection is available, but we do not guarantee uninterrupted availability of the sync, transcription or analysis services. Keep the app updated; older versions may stop working as the service evolves.',
   },
   {
-    heading: '14 · Liability',
+    heading: '12 · Liability',
     body:
       'Nothing in these terms excludes rights that cannot be excluded under the Australian Consumer Law. To the extent permitted by law, we exclude all other warranties, and our total liability in connection with the app is limited to resupplying the service or refunding the fees paid for the period in which the problem occurred. We are not liable for decisions made in reliance on app output, or for loss of data caused by factors outside our reasonable control.',
   },
   {
-    heading: '15 · Ending use & changes',
+    heading: '13 · Ending use & changes',
     body:
-      'You may stop using the app at any time; you or your organisation control your data as described in the Privacy policy. We may update these terms from time to time, and will note the date of the current version above. Continued use after a change means you accept the updated terms. These terms are governed by the laws of Australia.',
+      'You may stop using the app at any time; you control your data as described in the Privacy policy. We may update these terms from time to time, and will note the date of the current version above. Continued use after a change means you accept the updated terms. These terms are governed by the laws of Australia.',
   },
 ];
 
@@ -103,7 +93,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
   {
     heading: '2 · What we collect',
     body:
-      'Account information: name, email address, job title, whether you chose to receive our newsletter, and — for Enterprise accounts — your organisation’s name and which organisation you belong to. Event records: event name, site, date, description and photos. Interview material: interviewee name and role, audio recordings, transcripts and any corrections. Generated material: AI-produced insights, recommendations and exported reports. Subscription information: your plan, its status and renewal dates, and identifiers issued by our payment processors; we never see or store your card number. We also keep an audit log of key actions (such as approvals, invitations and removals) for accountability. The app does not capture a consent record — the facilitator obtains consent before recording, outside the app. We do not collect advertising identifiers or use third-party analytics. If you opted in to newsletters at sign-up (the box is ticked by default), we keep your email address and the date of that choice so we can send them; you can unsubscribe at any time from the Account tab, and every email includes an unsubscribe option.',
+      'Account information: name, email address, job title, and whether you chose to receive our newsletter. Event records: event name, site, date, description and photos. Interview material: interviewee name and role, audio recordings, transcripts and any corrections. Generated material: AI-produced insights, recommendations and exported reports. Subscription information: your plan, its status and renewal dates, and identifiers issued by the app stores and our subscription processor; we never see or store your card number. We also keep an audit log of key actions (such as approvals) for accountability. The app does not capture a consent record — the facilitator obtains consent before recording, outside the app. We do not collect advertising identifiers or use third-party analytics. If you opted in to newsletters at sign-up (the box is ticked by default), we keep your email address and the date of that choice so we can send them; you can unsubscribe at any time from the Account tab, and every email includes an unsubscribe option.',
   },
   {
     heading: '3 · How recordings are used',
@@ -113,22 +103,22 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
   {
     heading: '4 · Overseas processing & service providers',
     body:
-      'Transcription and analysis are performed by AI services hosted outside Australia, in the United States (audio transcription via Together AI; analysis via Anthropic). Audio and transcript content is sent to those services for processing and the results are returned to our Australian systems. Facilitators are required to disclose this when obtaining consent to record. Payments are processed by Stripe (web and Enterprise subscriptions), Apple and Google (in-app subscriptions) and RevenueCat (which reconciles in-app subscriptions); these providers receive your email address and subscription details but no interview content. Transactional email (invitations, receipts, notifications) is sent through Resend.',
+      'Transcription and analysis are performed by AI services hosted outside Australia, in the United States (audio transcription via Together AI; analysis via Anthropic). Audio and transcript content is sent to those services for processing and the results are returned to our Australian systems. Facilitators are required to disclose this when obtaining consent to record. Subscriptions are processed by Apple and Google (in-app purchases) and reconciled by RevenueCat; these providers receive your subscription details but no interview content. Transactional email is sent through Resend.',
   },
   {
     heading: '5 · Storage & security',
     body:
-      'Data is stored with our hosting provider (Supabase) in Sydney, Australia, encrypted in transit, with role-based access controls. Work captured offline is stored on the facilitator’s device until it syncs; the device also keeps a backup copy of each recording for seven days after the event’s report is generated, then deletes it automatically. Signing out removes the local copy of your data from the device. Access to a device is protected by its own lock screen — facilitators must keep their devices secured.',
+      'Data is stored with our hosting provider (Supabase) in Sydney, Australia, encrypted in transit, with role-based access controls. Work captured offline is stored on your device until it syncs; the device also keeps a backup copy of each recording for seven days after the event’s report is generated, then deletes it automatically. Signing out removes the local copy of your data from the device. Access to a device is protected by its own lock screen — keep your device secured.',
   },
   {
     heading: '6 · Who can access it',
     body:
-      'An Individual account holder can access only the events they created. In an Enterprise organisation, each member can access their own events, and the organisation’s supervisor can view every member’s events, interview transcripts, insights and reports for oversight — read-only. Supervisors are told this when they set up the organisation, and members are told when they accept an invitation. Our own administrator can view events and reports across the service for support and oversight, manage the question set, and receive a notification when an event is logged. We access data only as needed to operate and support the service.',
+      'You can access only the events you created. Our own administrator can view events and reports across the service for support and oversight, manage the question set, and receive a notification when an event is logged. We access data only as needed to operate and support the service.',
   },
   {
     heading: '7 · Retention & deletion',
     body:
-      'Audio recordings are deleted from our servers automatically as soon as the event’s report is generated; recordings for events that never produce a report are deleted after a backstop window (90 days by default). The facilitator’s device keeps its copy of each recording for seven days after the report, then deletes it. Transcripts and insights are retained as the review record. You can delete your account from the app or the website: an Individual account’s events, transcripts and reports are deleted with it; an Enterprise member’s events remain with their organisation, which owns them, and the member’s personal details are removed. Billing records are kept for as long as tax law requires. Interview participants may ask the organisation that interviewed them to access, correct or delete their information, and we will assist with those requests.',
+      'Audio recordings are deleted from our servers automatically as soon as the event’s report is generated; recordings for events that never produce a report are deleted after a backstop window (90 days by default). Your device keeps its copy of each recording for seven days after the report, then deletes it. Transcripts and insights are retained as the review record. You can delete your account from the app or the website: your events, transcripts and reports are deleted with it. Billing records are kept for as long as tax law requires. Interview participants may ask the organisation that interviewed them to access, correct or delete their information, and we will assist with those requests.',
   },
   {
     heading: '8 · Your rights & contact',
@@ -150,14 +140,14 @@ export const FAQS = [
       'Open the interview on the Approve transcript screen and tap any answer to edit it. Your correction replaces the automatic transcript, and approving unlocks the AI analysis.',
   },
   {
-    question: "Who can see an event's insight?",
+    question: 'What does Event Insight cost?',
     answer:
-      'The person who logged the event and, on an Enterprise plan, their supervisor — read-only. Our administrator can also view reports for support. Insights can be shared as a PDF from the insight screen.',
+      'Your first insight report is free. After that it’s A$19.99 a month (including GST), billed through the App Store or Google Play, cancellable any time in your device’s subscription settings. Everything you captured stays viewable even without a subscription.',
   },
   {
-    question: 'How do I change or cancel my subscription?',
+    question: "Who can see an event's insight?",
     answer:
-      'If you subscribed in the app, manage it from your device’s App Store or Google Play subscription settings (Account tab → Manage subscription). Enterprise plans and web subscriptions are managed from your online account, where you can also download tax invoices.',
+      'You, and our administrator for support and oversight. Insights can be shared as a PDF from the insight screen.',
   },
   {
     question: 'How long are recordings kept?',

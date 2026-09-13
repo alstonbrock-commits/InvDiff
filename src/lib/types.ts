@@ -1,8 +1,6 @@
 // Shared domain types. Mirror the Postgres schema and the local SQLite mirror.
 
 export type UserRole = 'admin' | 'facilitator';
-/** Enterprise seat role; null for individual accounts. */
-export type OrgRole = 'supervisor' | 'member';
 export type EventStatus = 'draft' | 'active' | 'finalised';
 export type UploadStatus = 'pending' | 'uploading' | 'uploaded' | 'failed';
 export type TranscriptStatus =
@@ -24,11 +22,10 @@ export interface Profile {
   job_title: string | null;
   newsletter_opt_in: boolean;
   newsletter_opt_in_at: string | null;
-  /** Enterprise organisation this account belongs to (null = individual). */
-  org_id: string | null;
-  org_role: OrgRole | null;
   /** When the first-run onboarding slideshow was completed. */
   onboarded_at: string | null;
+  /** When this account generated its one free report (null = still available). */
+  free_report_used_at: string | null;
 }
 
 export interface EventRow {

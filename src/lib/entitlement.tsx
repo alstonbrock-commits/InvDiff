@@ -1,10 +1,12 @@
 // What the signed-in account is allowed to use.
 //
-// Source of truth is the server (`my_entitlement()` RPC → organisations /
-// subscriptions rows, written by the Stripe and RevenueCat webhooks). Two
+// Solo model: one plan (A$19.99/month via Apple / Google Play), and every new
+// account may generate ONE report free before subscribing. Source of truth is
+// the server (`my_entitlement()` RPC → subscriptions row + the free-report
+// flag, written by the RevenueCat webhook and generate-insights). Two
 // supplements keep the field experience sane:
 //   1. an AsyncStorage mirror, so a cold start with no reception still knows
-//      the plan is current (`access_until` in the future) and lets the user in;
+//      where the account stands;
 //   2. RevenueCat's customer info, so a purchase unlocks the app the instant
 //      the store confirms it, before the webhook has landed.
 import React, {
@@ -26,22 +28,9 @@ import {
   hasIndividualEntitlement,
   subscribeCustomerInfo,
 } from './billing';
-import type { OrgRole } from './types';
-
-export interface OrgEntitlement {
-  id: string;
-  name: string;
-  role: OrgRole | null;
-  status: string;
-  seat_count: number;
-  seats_used: number;
-  pending_invites: number;
-  current_period_end: string | null;
-  supervisor_name: string | null;
-}
 
 export interface IndividualEntitlement {
-  provider: 'apple' | 'google' | 'stripe' | 'manual';
+  provider: 'apple' | 'google' | 'manual';
   status: string;
   trial_end: string | null;
   current_period_end: string | null;
@@ -49,9 +38,10 @@ export interface IndividualEntitlement {
 
 export interface Entitlement {
   active: boolean;
-  kind: 'admin' | 'org' | 'individual' | 'none';
+  /** 'free' = the one free report is still available; 'none' = view-only. */
+  kind: 'admin' | 'individual' | 'free' | 'none';
+  free_report_used: boolean;
   access_until: string | null;
-  org: OrgEntitlement | null;
   individual: IndividualEntitlement | null;
 }
 
@@ -59,8 +49,10 @@ interface EntitlementState {
   /** True until the first server/cache read for this session has settled. */
   loading: boolean;
   entitlement: Entitlement | null;
-  /** Whether the account may use the app right now. */
+  /** Whether the account may record and generate right now. */
   active: boolean;
+  /** The one free report has been generated. */
+  freeReportUsed: boolean;
   /** True when access comes from the store SDK ahead of the webhook. */
   storeUnlocked: boolean;
   /** Last read came from the offline mirror, not the server. */
@@ -70,8 +62,7 @@ interface EntitlementState {
 
 const CACHE_KEY = (userId: string) => `entitlement-cache:${userId}`;
 // A poor-but-"reachable" connection can hang the RPC for the platform fetch
-// timeout; the gate would show nothing that whole time. Fall back to the
-// cache after this.
+// timeout; the app would sit blank that whole time. Fall back to the cache.
 const RPC_TIMEOUT_MS = 8000;
 
 const EntitlementContext = createContext<EntitlementState | null>(null);
@@ -79,6 +70,7 @@ const EntitlementContext = createContext<EntitlementState | null>(null);
 function isCurrent(e: Entitlement | null): boolean {
   if (!e) return false;
   if (e.kind === 'admin') return e.active;
+  if (e.kind === 'free') return true;
   if (!e.access_until) return false;
   return Date.parse(e.access_until) > Date.now();
 }
@@ -178,10 +170,9 @@ export function EntitlementProvider({ children }: { children: React.ReactNode })
     };
   }, [userId, load]);
 
-  // Re-check the server whenever the app comes back to the foreground and on
-  // a slow interval: a plan that lapses mid-session should send the user to
-  // the paywall on their next look, and a plan that arrived out-of-band
-  // (web purchase) should let them in without a restart.
+  // Re-check the server when the app comes back to the foreground and on a
+  // slow interval: a plan that lapses mid-session drops to view-only on the
+  // next look, and a plan bought on another device unlocks without a restart.
   useEffect(() => {
     if (!userId) return;
     const interval = setInterval(() => void load(userId), 10 * 60_000);
@@ -198,11 +189,8 @@ export function EntitlementProvider({ children }: { children: React.ReactNode })
     () => ({
       loading,
       entitlement,
-      // Server says yes, or the store SDK says yes and the server is not an
-      // organisation account (org members never buy individually).
-      active:
-        isCurrent(entitlement) ||
-        (storeUnlocked && entitlement?.kind !== 'org'),
+      active: isCurrent(entitlement) || storeUnlocked,
+      freeReportUsed: entitlement?.free_report_used ?? false,
       storeUnlocked,
       fromCache,
       refresh,

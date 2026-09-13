@@ -6,17 +6,15 @@ import { useAuth } from '@/lib/auth';
 import { useFocusData } from '@/lib/hooks';
 import {
   displayRef,
-  listVisibleEventsWithCounts,
+  listMyEventsWithCounts,
   unsyncedEventIds,
-  type VisibleEventItem,
+  type EventListItem,
 } from '@/lib/db/queries';
-import { pillStatus, eventMeta, ownerOf } from '../(dashboard)';
+import { pillStatus, eventMeta } from '../(dashboard)';
 
 type FilterId = 'all' | 'review' | 'done';
-// Supervisors only: whose events to list.
-type ScopeId = 'everyone' | 'mine' | 'team';
 
-function eventDate(e: VisibleEventItem): Date {
+function eventDate(e: EventListItem): Date {
   return new Date(e.occurred_at ?? e.created_at);
 }
 
@@ -31,36 +29,24 @@ function groupHeading(d: Date, now: Date): string {
 
 export default function Events() {
   const router = useRouter();
-  const { session, profile } = useAuth();
+  const { session } = useAuth();
   const ownerId = session?.user.id;
-  const supervisor = profile?.org_role === 'supervisor';
   const [filter, setFilter] = useState<FilterId>('all');
-  const [scope, setScope] = useState<ScopeId>('everyone');
   const [search, setSearch] = useState('');
 
   const { data } = useFocusData(
     async () => {
       if (!ownerId) return null;
       const [events, unsynced] = await Promise.all([
-        listVisibleEventsWithCounts(ownerId, supervisor),
+        listMyEventsWithCounts(ownerId),
         unsyncedEventIds(),
       ]);
       return { events, unsynced };
     },
-    [ownerId, supervisor],
+    [ownerId],
   );
 
-  const allEvents = data?.events ?? [];
-  const events = !supervisor
-    ? allEvents
-    : allEvents.filter((e) =>
-        scope === 'everyone' ? true : scope === 'mine' ? e.is_mine : !e.is_mine,
-      );
-  const scopes: { id: ScopeId; label: string }[] = [
-    { id: 'everyone', label: 'Everyone' },
-    { id: 'mine', label: `Mine ${allEvents.filter((e) => e.is_mine).length}` },
-    { id: 'team', label: `Team ${allEvents.filter((e) => !e.is_mine).length}` },
-  ];
+  const events = data?.events ?? [];
   const counts = {
     all: events.length,
     review: events.filter((e) => e.status === 'active').length,
@@ -89,7 +75,7 @@ export default function Events() {
 
   // Group in display order (list is already sorted desc by date).
   const now = new Date();
-  const groups: { heading: string; events: VisibleEventItem[] }[] = [];
+  const groups: { heading: string; events: EventListItem[] }[] = [];
   for (const e of visible) {
     const heading = groupHeading(eventDate(e), now);
     const last = groups[groups.length - 1];
@@ -108,41 +94,6 @@ export default function Events() {
       />
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 16 }}>
-        {/* Scope pills — supervisors see the team's events alongside their own */}
-        {supervisor && (
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 7,
-              paddingTop: 14,
-              paddingHorizontal: 16,
-            }}
-          >
-            {scopes.map((s) => (
-              <Pressable
-                key={s.id}
-                onPress={() => setScope(s.id)}
-                style={{
-                  backgroundColor: scope === s.id ? '#1B2B3A' : '#EFEDE7',
-                  paddingHorizontal: 11,
-                  paddingVertical: 6,
-                  borderRadius: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: 'PublicSans-700',
-                    fontSize: 11,
-                    color: scope === s.id ? '#FFFFFF' : '#5D6B70',
-                  }}
-                >
-                  {s.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-
         {/* Filter pills — first row of the body, on paper */}
         <View
           style={{
@@ -203,7 +154,7 @@ export default function Events() {
                     key={event.id}
                     eventId={displayRef(event.id)}
                     title={event.title}
-                    meta={eventMeta(event, ownerOf(event))}
+                    meta={eventMeta(event)}
                     status={pill.status}
                     statusLabel={pill.label}
                     padding={13}

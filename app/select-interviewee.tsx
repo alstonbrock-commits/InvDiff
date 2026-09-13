@@ -12,7 +12,8 @@ import {
   alertDialog,
   showDialog,
 } from '@/components';
-import { useAuth } from '@/lib/auth';
+import { useEntitlement } from '@/lib/entitlement';
+import { promptSubscribe } from '@/lib/paywallPrompt';
 import { useFocusData, useKeyboardHeight } from '@/lib/hooks';
 import {
   addInterviewee,
@@ -22,7 +23,6 @@ import {
   listInterviewees,
   listQuestions,
   removeInterviewee,
-  teamMemberName,
   updateInterviewee,
 } from '@/lib/db/queries';
 import { fetchEventTranscripts } from '@/lib/remote';
@@ -34,8 +34,7 @@ export default function SelectInterviewee() {
   const insets = useSafeAreaInsets();
   const keyboardHeight = useKeyboardHeight();
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
-  const { session } = useAuth();
-  const userId = session?.user.id ?? null;
+  const ent = useEntitlement();
   const [selected, setSelected] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   // A joint interview holds several people — one name field per person.
@@ -77,21 +76,10 @@ export default function SelectInterviewee() {
           );
         }
       }
-      // A supervisor opening a team member's event: name the owner and put
-      // the screen into read-only mode (every write below is hidden — RLS
-      // would reject the push, and a rejected row stalls the whole outbox).
-      const ownerName =
-        event && userId && event.owner_id !== userId
-          ? await teamMemberName(event.owner_id)
-          : null;
-      return { event, people, questions, doneAt, recordedCount, ownerName };
+      return { event, people, questions, doneAt, recordedCount };
     },
-    [eventId, userId],
+    [eventId],
   );
-
-  const readOnly = !!data?.event && !!userId && data.event.owner_id !== userId;
-  const ownerLabel = data?.ownerName ?? 'a team member';
-  const anyRecorded = [...(data?.recordedCount.values() ?? [])].some((n) => n > 0);
 
   const people = data?.people ?? [];
   const questions = data?.questions ?? [];
@@ -152,6 +140,10 @@ export default function SelectInterviewee() {
   // interviews" was answered earlier (or by mistake) and the event is ready.
   const generateFromRoster = async () => {
     if (genBusy || !eventId) return;
+    if (!ent.active) {
+      promptSubscribe(router);
+      return;
+    }
     setGenBusy(true);
     try {
       const rows = await fetchEventTranscripts(eventId);
@@ -210,6 +202,11 @@ export default function SelectInterviewee() {
 
   const start = () => {
     if (!selectedPerson || !eventId) return;
+    // Free report used and no subscription → recording is locked.
+    if (!ent.active) {
+      promptSubscribe(router);
+      return;
+    }
     router.push({
       pathname: '/recorded-interview',
       params: { eventId, intervieweeId: selectedPerson.id },
@@ -243,7 +240,7 @@ export default function SelectInterviewee() {
     <View style={{ flex: 1, backgroundColor: '#F6F5F1' }}>
       <ScreenHeader
         variant="titled"
-        title={readOnly ? `${ownerLabel}'s interviews` : 'Who are you interviewing?'}
+        title="Who are you interviewing?"
         subtitle={subtitle}
         onBack={() => router.back()}
       />
@@ -263,7 +260,7 @@ export default function SelectInterviewee() {
         {people.map((person) => {
           const done = data?.doneAt.get(person.id);
           const partOf = data?.recordedCount.get(person.id) ?? 0;
-          const isSelected = !readOnly && !done && person.id === effectiveSelected;
+          const isSelected = !done && person.id === effectiveSelected;
 
           // Correcting a name, or taking someone off the event who was never
           // interviewed — without this the roster gate below has no escape.
@@ -343,13 +340,7 @@ export default function SelectInterviewee() {
               key={person.id}
               // Not yet recorded → select them. Finished → open their
               // transcripts for review/correction (works post-insight too).
-              onPress={() =>
-                readOnly
-                  ? partOf > 0 && review(person.id)
-                  : done
-                    ? review(person.id)
-                    : setSelected(person.id)
-              }
+              onPress={() => (done ? review(person.id) : setSelected(person.id))}
               style={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: 12,
@@ -415,25 +406,23 @@ export default function SelectInterviewee() {
               </View>
 
               {/* Hit area kept generous — it sits next to the row's own tap. */}
-              {!readOnly && (
-                <Pressable
-                  onPress={() => startEditPerson(person.id, person.name, person.role_or_segment)}
-                  hitSlop={8}
-                  style={{ paddingHorizontal: 8, paddingVertical: 6 }}
+              <Pressable
+                onPress={() => startEditPerson(person.id, person.name, person.role_or_segment)}
+                hitSlop={8}
+                style={{ paddingHorizontal: 8, paddingVertical: 6 }}
+              >
+                <Text
+                  style={{
+                    fontFamily: 'PublicSans-600',
+                    fontSize: 11.5,
+                    color: '#2CA5C0',
+                  }}
                 >
-                  <Text
-                    style={{
-                      fontFamily: 'PublicSans-600',
-                      fontSize: 11.5,
-                      color: '#2CA5C0',
-                    }}
-                  >
-                    Edit
-                  </Text>
-                </Pressable>
-              )}
+                  Edit
+                </Text>
+              </Pressable>
 
-              {done || (readOnly && partOf > 0) ? (
+              {done ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
                   <View
                     style={{
@@ -444,14 +433,14 @@ export default function SelectInterviewee() {
                     }}
                   >
                     <Text style={{ fontFamily: 'Archivo-700', fontSize: 9.5, color: '#2CA5C0' }}>
-                      {done ? `DONE ${done}` : `${partOf} OF ${questions.length}`}
+                      DONE {done}
                     </Text>
                   </View>
                   <Text style={{ fontFamily: 'PublicSans-600', fontSize: 16, color: '#8A9499' }}>
                     ›
                   </Text>
                 </View>
-              ) : readOnly ? null : (
+              ) : (
                 <View
                   style={{
                     width: 20,
@@ -475,7 +464,7 @@ export default function SelectInterviewee() {
           );
         })}
 
-        {readOnly ? null : adding ? (
+        {adding ? (
           <View style={{ gap: 10 }}>
             {newNames.map((n, i) => (
               <Field
@@ -602,40 +591,8 @@ export default function SelectInterviewee() {
         </View>
       </ScrollView>
 
-      {/* Supervisor view of a team member's event: look, don't touch. */}
-      {readOnly && keyboardHeight === 0 && (
-        <View style={{ paddingTop: 14, paddingHorizontal: 18, paddingBottom: 22 + insets.bottom }}>
-          <View style={{ marginBottom: 10 }}>
-            <OfflineNote>
-              {`Read-only — this event belongs to ${ownerLabel}. Tap a person to read their transcripts.`}
-            </OfflineNote>
-          </View>
-          {finalised ? (
-            <Button
-              variant="primary"
-              fullWidth
-              onPress={() => router.push({ pathname: '/insight-detail', params: { eventId } })}
-            >
-              View insight
-            </Button>
-          ) : (
-            <Button
-              variant="secondary"
-              fullWidth
-              disabled={!anyRecorded}
-              onPress={() => {
-                const first = people.find((p) => (data?.recordedCount.get(p.id) ?? 0) > 0);
-                if (first) review(first.id);
-              }}
-            >
-              {anyRecorded ? 'View transcripts' : 'No interviews recorded yet'}
-            </Button>
-          )}
-        </View>
-      )}
-
       {/* Hidden while typing so the footer never covers the add-person fields. */}
-      {!readOnly && keyboardHeight === 0 && (
+      {keyboardHeight === 0 && (
         <View style={{ paddingTop: 14, paddingHorizontal: 18, paddingBottom: 22 + insets.bottom }}>
           <View style={{ marginBottom: 10 }}>
             <OfflineNote>

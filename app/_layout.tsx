@@ -52,9 +52,10 @@ export default function RootLayout() {
                 <Stack.Screen name="(auth)" />
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="(admin)" />
-                {/* Interstitials between sign-in and the app — no back gesture. */}
-                <Stack.Screen name="paywall" options={{ gestureEnabled: false }} />
-                <Stack.Screen name="subscription-inactive" options={{ gestureEnabled: false }} />
+                {/* Interstitials between sign-in and the app — no back gesture.
+                    (paywall is NOT one of these: it opens on demand.) */}
+                <Stack.Screen name="paywall" />
+                <Stack.Screen name="account-inactive" options={{ gestureEnabled: false }} />
                 <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
                 <Stack.Screen name="complete-profile" options={{ gestureEnabled: false }} />
                 <Stack.Screen

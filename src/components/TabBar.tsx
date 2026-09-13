@@ -3,13 +3,12 @@ import { View, Text, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-// Covers both navigators: facilitator (dashboard/events/insights/[team]/account)
-// and admin (dashboard/reports/users/settings).
+// Covers both navigators: facilitator (dashboard/events/insights/account) and
+// admin (dashboard/reports/users/settings).
 const LABELS: Record<string, string> = {
   '(dashboard)': 'Dashboard',
   '(events)': 'Events',
   '(insights)': 'Insights',
-  '(team)': 'Team',
   '(account)': 'Account',
   '(reports)': 'Reports',
   '(users)': 'Users',

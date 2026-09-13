@@ -4,13 +4,14 @@ import { useRouter } from 'expo-router';
 import { ScreenHeader, StatTile, EventCard, Button } from '@/components';
 import { useAuth } from '@/lib/auth';
 import { useFocusData } from '@/lib/hooks';
+import { useEntitlement } from '@/lib/entitlement';
+import { promptSubscribe } from '@/lib/paywallPrompt';
 import {
   displayRef,
   eventStatusCounts,
-  listVisibleEventsWithCounts,
+  listMyEventsWithCounts,
   unsyncedEventIds,
   type EventListItem,
-  type VisibleEventItem,
 } from '@/lib/db/queries';
 import type { EventStatus } from '@/components/StatusPill';
 
@@ -25,43 +26,29 @@ export function pillStatus(
   return { status: 'needs-review' };
 }
 
-export function eventMeta(e: EventListItem, ownerName?: string | null): string {
+export function eventMeta(e: EventListItem): string {
   const n = e.interviewee_count;
   const people = `${n} interviewee${n === 1 ? '' : 's'}`;
-  const base = e.site ? `${e.site} · ${people}` : people;
-  // Supervisor feed: say whose event it is.
-  return ownerName ? `${base} · ${ownerName}` : base;
-}
-
-// Team events carry their owner's name; own events do not.
-export function ownerOf(e: VisibleEventItem): string | null {
-  return e.is_mine ? null : e.owner_name ?? 'Team member';
+  return e.site ? `${e.site} · ${people}` : people;
 }
 
 export default function Dashboard() {
   const router = useRouter();
-  const { session, profile } = useAuth();
+  const { session } = useAuth();
   const ownerId = session?.user.id;
-  const supervisor = profile?.org_role === 'supervisor';
+  const ent = useEntitlement();
 
   const { data } = useFocusData(
     async () => {
       if (!ownerId) return null;
       const [counts, events, unsynced] = await Promise.all([
         eventStatusCounts(ownerId),
-        listVisibleEventsWithCounts(ownerId, supervisor),
+        listMyEventsWithCounts(ownerId),
         unsyncedEventIds(),
       ]);
-      // Tiles and "Recent" stay about the user's own work; a supervisor gets
-      // a separate glance at what the team has logged lately.
-      return {
-        counts,
-        recent: events.filter((e) => e.is_mine).slice(0, 2),
-        team: events.filter((e) => !e.is_mine).slice(0, 3),
-        unsynced,
-      };
+      return { counts, recent: events.slice(0, 2), unsynced };
     },
-    [ownerId, supervisor],
+    [ownerId],
   );
 
   return (
@@ -134,46 +121,13 @@ export default function Dashboard() {
           );
         })}
 
-        {supervisor && data && data.team.length > 0 && (
-          <>
-            <Text
-              style={{
-                fontFamily: 'Archivo-700',
-                fontSize: 14,
-                color: '#17262D',
-                marginTop: 6,
-                marginBottom: 10,
-              }}
-            >
-              Team activity
-            </Text>
-            {data.team.map((event) => {
-              const pill = pillStatus(event.status, false);
-              return (
-                <View key={event.id} style={{ marginBottom: 10 }}>
-                  <EventCard
-                    eventId={displayRef(event.id)}
-                    title={event.title}
-                    meta={eventMeta(event, ownerOf(event))}
-                    status={pill.status}
-                    statusLabel={pill.label}
-                    padding={14}
-                    onPress={() =>
-                      router.push({ pathname: '/select-interviewee', params: { eventId: event.id } })
-                    }
-                  />
-                </View>
-              );
-            })}
-          </>
-        )}
-
         <View style={{ marginTop: 'auto' }}>
           <Button
             variant="primary"
             size="sm"
             fullWidth
-            onPress={() => router.push('/log-new-event')}
+            // View-only once the free report is used: subscribing unlocks it.
+            onPress={() => (ent.active ? router.push('/log-new-event') : promptSubscribe(router))}
           >
             Log new event
           </Button>

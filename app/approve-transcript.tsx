@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { ScreenHeader, Button, SuccessDialog, alertDialog, showDialog } from '@/components';
-import { useAuth } from '@/lib/auth';
+import { useEntitlement } from '@/lib/entitlement';
+import { promptSubscribe } from '@/lib/paywallPrompt';
 import { useFocusData, useKeyboardHeight } from '@/lib/hooks';
 import {
   displayRef,
@@ -44,8 +45,7 @@ export default function ApproveTranscript() {
     eventId: string;
     intervieweeId: string;
   }>();
-  const { session } = useAuth();
-  const userId = session?.user.id;
+  const ent = useEntitlement();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
@@ -137,9 +137,6 @@ export default function ApproveTranscript() {
     mine.filter((t) => t.status === 'approved').length >= expected;
   const finalised = local?.event?.status === 'finalised';
   const offline = transcriptsQuery.isError;
-  // A supervisor reading a team member's interview: transcripts are shown,
-  // nothing can be edited or approved (RLS would refuse it anyway).
-  const readOnly = !!local?.event && !!userId && local.event.owner_id !== userId;
 
   const startEdit = (t: TranscriptDetail) => {
     setEditingId(t.id);
@@ -159,6 +156,12 @@ export default function ApproveTranscript() {
 
   const approveAll = async () => {
     if (busy || !eventId) return;
+    // Approving leads straight into generation; once the free report is used
+    // and there is no subscription, that path is locked.
+    if (!ent.active) {
+      promptSubscribe(router);
+      return;
+    }
     setBusy(true);
     try {
       for (const t of mine) {
@@ -344,8 +347,7 @@ export default function ApproveTranscript() {
 
             {/* Interviewee card: the transcribed answer */}
             <Pressable
-              onPress={() => !readOnly && startEdit(t)}
-              disabled={readOnly}
+              onPress={() => startEdit(t)}
               style={{
                 backgroundColor: '#FFFFFF',
                 borderWidth: 1,
@@ -485,9 +487,7 @@ export default function ApproveTranscript() {
               flex: 1,
             }}
           >
-            {readOnly
-              ? 'Read-only — you can read these transcripts but not change or approve them.'
-              : offline
+            {offline
               ? 'Transcripts appear once you are back online.'
               : allReady
                 ? finalised
@@ -503,15 +503,7 @@ export default function ApproveTranscript() {
       </View>
       )}
 
-      {keyboardHeight === 0 && readOnly && (
-      <View style={{ paddingTop: 10, paddingHorizontal: 18, paddingBottom: 22 + insets.bottom }}>
-        <Button variant="secondary" size="sm" fullWidth onPress={() => router.back()}>
-          Back to the roster
-        </Button>
-      </View>
-      )}
-
-      {keyboardHeight === 0 && !readOnly && (
+      {keyboardHeight === 0 && (
       <View
         style={{
           flexDirection: 'row',

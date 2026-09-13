@@ -20,7 +20,7 @@ import {
   claimBillingEvent,
   markBillingEventProcessed,
   releaseBillingEvent,
-} from '../_shared/stripe.ts';
+} from '../_shared/billingEvents.ts';
 
 const ENTITLEMENT_ID = 'individual';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -28,7 +28,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 // grace period; this is just slack for webhook delay.
 const GRACE_MS = 24 * 3600_000;
 
-type Provider = 'apple' | 'google' | 'stripe' | 'manual';
+type Provider = 'apple' | 'google' | 'manual';
 
 interface RcSubscription {
   expires_date: string | null;
@@ -57,8 +57,6 @@ function providerFor(store: string | undefined | null): Provider {
     case 'play_store':
     case 'amazon':
       return 'google';
-    case 'stripe':
-      return 'stripe';
     default:
       return 'manual'; // promotional / unknown
   }
@@ -191,8 +189,6 @@ async function syncSubscriber(db: Db, userId: string, fallback: Provider): Promi
     console.error('revenuecat: unknown store for', userId, ent.product_identifier, store?.store);
     provider = fallback === 'apple' || fallback === 'google' ? fallback : 'manual';
   }
-  // Stripe-billed rows belong to stripe-webhook.
-  if (provider === 'stripe') return;
 
   const expires = ent.expires_date ? Date.parse(ent.expires_date) : null;
   const grace = store?.grace_period_expires_date

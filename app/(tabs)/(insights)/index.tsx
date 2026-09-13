@@ -3,7 +3,8 @@ import { View, ScrollView, Text, Pressable, RefreshControl } from 'react-native'
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { ScreenHeader, Eyebrow, Button, alertDialog } from '@/components';
-import { useAuth } from '@/lib/auth';
+import { useEntitlement } from '@/lib/entitlement';
+import { promptSubscribe } from '@/lib/paywallPrompt';
 import { displayRef } from '@/lib/db/queries';
 import {
   fetchAnalysingEvents,
@@ -56,15 +57,10 @@ function shortDate(iso: string | null): string | null {
   });
 }
 
-type ScopeId = 'everyone' | 'mine' | 'team';
-
 export default function Insights() {
   const router = useRouter();
-  const { session, profile } = useAuth();
-  const userId = session?.user.id;
-  const supervisor = profile?.org_role === 'supervisor';
+  const ent = useEntitlement();
   const [search, setSearch] = useState('');
-  const [scope, setScope] = useState<ScopeId>('everyone');
 
   const feed = useQuery({ queryKey: ['insights-feed'], queryFn: fetchInsightsFeed });
   const analysing = useQuery({
@@ -88,12 +84,15 @@ export default function Insights() {
     queryFn: fetchFailedInsightEvents,
     refetchInterval: 60_000,
   });
-  // Only the owner can restart a synthesis, so a supervisor sees just their own.
-  const failed = (failedQuery.data ?? []).filter((f) => !userId || f.owner_id === userId);
+  const failed = failedQuery.data ?? [];
   const [retrying, setRetrying] = useState<string | null>(null);
 
   const retry = async (eventId: string) => {
     if (retrying) return;
+    if (!ent.active) {
+      promptSubscribe(router);
+      return;
+    }
     setRetrying(eventId);
     try {
       await generateInsights(eventId);
@@ -107,19 +106,16 @@ export default function Insights() {
 
   // Search across the insight text and the event's identity.
   const filtered = useMemo(() => {
-    let items = feed.data ?? [];
-    if (supervisor && scope !== 'everyone') {
-      items = items.filter((i) => (scope === 'mine' ? i.owner_id === userId : i.owner_id !== userId));
-    }
+    const items = feed.data ?? [];
     const q = search.trim().toLowerCase();
     if (!q) return items;
     return items.filter((i) =>
-      [i.title, i.body, i.event_title, i.event_site ?? '', i.owner_name ?? '', displayRef(i.event_id)]
+      [i.title, i.body, i.event_title, i.event_site ?? '', displayRef(i.event_id)]
         .join(' ')
         .toLowerCase()
         .includes(q),
     );
-  }, [feed.data, search, scope, supervisor, userId]);
+  }, [feed.data, search]);
 
   // Bucket the (already newest-first) list into runs, Events-style.
   const groups = useMemo(() => {
@@ -162,39 +158,6 @@ export default function Insights() {
           />
         }
       >
-        {supervisor && (
-          <View style={{ flexDirection: 'row', gap: 7 }}>
-            {(
-              [
-                { id: 'everyone', label: 'Everyone' },
-                { id: 'mine', label: 'Mine' },
-                { id: 'team', label: 'Team' },
-              ] as { id: ScopeId; label: string }[]
-            ).map((s) => (
-              <Pressable
-                key={s.id}
-                onPress={() => setScope(s.id)}
-                style={{
-                  backgroundColor: scope === s.id ? '#1B2B3A' : '#EFEDE7',
-                  paddingHorizontal: 11,
-                  paddingVertical: 6,
-                  borderRadius: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: 'PublicSans-700',
-                    fontSize: 11,
-                    color: scope === s.id ? '#FFFFFF' : '#5D6B70',
-                  }}
-                >
-                  {s.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-
         {feed.isError && (
           <Text
             style={{
@@ -454,23 +417,6 @@ export default function Insights() {
                     >
                       <Text style={{ fontFamily: 'PublicSans-600', fontSize: 10, color: '#5D6B70' }}>
                         {insight.event_site}
-                      </Text>
-                    </View>
-                  )}
-                  {supervisor && insight.owner_id !== userId && (
-                    <View
-                      style={{
-                        backgroundColor: '#E7EEF0',
-                        paddingHorizontal: 8,
-                        paddingVertical: 3,
-                        borderRadius: 20,
-                      }}
-                    >
-                      <Text
-                        numberOfLines={1}
-                        style={{ fontFamily: 'PublicSans-600', fontSize: 10, color: '#1E7F94' }}
-                      >
-                        {insight.owner_name ?? 'Team'}
                       </Text>
                     </View>
                   )}

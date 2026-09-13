@@ -169,17 +169,12 @@ export interface InsightFeedItem extends InsightRow {
   event_site: string | null;
   event_date: string | null; // occurred_at, falling back to created_at
   recommendation_count: number;
-  /** Who logged the event — lets a supervisor tell team reports from their own. */
-  owner_id: string;
-  owner_name: string | null;
 }
 
 export async function fetchInsightsFeed(): Promise<InsightFeedItem[]> {
   const { data: insights, error } = await supabase
     .from('insights')
-    .select(
-      '*, events!inner ( title, site, status, occurred_at, created_at, owner_id, profiles ( full_name, email ) )',
-    )
+    .select('*, events!inner ( title, site, status, occurred_at, created_at )')
     .is('deleted_at', null)
     .order('generated_at', { ascending: false })
     .order('position');
@@ -200,8 +195,6 @@ export async function fetchInsightsFeed(): Promise<InsightFeedItem[]> {
     event_site: i.events.site ?? null,
     event_date: i.events.occurred_at ?? i.events.created_at ?? null,
     recommendation_count: (recs ?? []).filter((r) => r.insight_id === i.id).length,
-    owner_id: i.events.owner_id,
-    owner_name: i.events.profiles?.full_name || i.events.profiles?.email || null,
   }));
 }
 
@@ -228,11 +221,11 @@ export async function fetchAnalysingEvents(): Promise<
 // Events whose most recent synthesis failed and that still have no insights —
 // the background job's outcome has to be visible somewhere, with a way back in.
 export async function fetchFailedInsightEvents(): Promise<
-  { event_id: string; event_title: string; owner_id: string; error: string | null; at: string }[]
+  { event_id: string; event_title: string; error: string | null; at: string }[]
 > {
   const { data } = await supabase
     .from('ai_jobs')
-    .select('event_id, status, type, error, created_at, events!inner ( title, owner_id )')
+    .select('event_id, status, type, error, created_at, events!inner ( title )')
     .eq('type', 'insights')
     .gte('created_at', new Date(Date.now() - 7 * 86_400_000).toISOString())
     .order('created_at', { ascending: false });
@@ -251,7 +244,6 @@ export async function fetchFailedInsightEvents(): Promise<
     .map((j: any) => ({
       event_id: j.event_id,
       event_title: j.events?.title ?? '',
-      owner_id: j.events?.owner_id ?? '',
       error: j.error ?? null,
       at: j.created_at,
     }));

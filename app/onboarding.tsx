@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -55,30 +55,23 @@ const SLIDES: Slide[] = [
     eyebrow: 'Step 5',
     title: 'Generate the insight report',
     body: 'When the interviews are approved, generate the report. It reads every transcript and writes a de-identified learning document.',
-    points: ['Up to five insights and three recommendations', 'Share the PDF from the Insights tab'],
+    points: [
+      'Your first report is free — subscribe for unlimited reports',
+      'Share the PDF from the Insights tab',
+    ],
   },
 ];
-
-const TEAM_SLIDE: Slide = {
-  eyebrow: 'Your team',
-  title: 'See your team’s work',
-  body: 'As a supervisor, every event and report your team logs appears in your feed alongside your own — read-only, so their work stays theirs.',
-  points: ['Invite and remove people from the Team tab', 'Team members only ever see their own events'],
-};
 
 export default function Onboarding() {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const gate = useGate();
-  const { profile, markOnboarded } = useAuth();
+  const { markOnboarded } = useAuth();
   const listRef = useRef<FlatList<Slide>>(null);
   const [index, setIndex] = useState(0);
   const [finishing, setFinishing] = useState(false);
 
-  const slides = useMemo(
-    () => (profile?.org_role === 'supervisor' ? [...SLIDES, TEAM_SLIDE] : SLIDES),
-    [profile?.org_role],
-  );
+  const slides = SLIDES;
 
   if (gate.target && gate.target !== ROUTES.onboarding) return <Redirect href="/" />;
 

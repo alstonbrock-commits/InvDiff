@@ -5,22 +5,13 @@ import { all, getDb } from '../db';
 import { supabase } from '../supabase';
 import { SERVER_COLUMNS } from '../db/schema';
 
-// team_members goes FIRST: when the roster grows (a member joins, is
-// reactivated, or this account becomes a supervisor) the capture tables must
-// be re-pulled from scratch, because their per-table high-water marks are
-// already past the newcomer's older rows. (The server also bumps updated_at
-// on a member's rows when their org changes — migration 0030 — so either
-// mechanism alone would do; both together cover every ordering.)
 const PULL_TABLES = [
-  'team_members', // server view; empty for individual accounts
   'events',
   'event_questions',
   'interviewees',
   'answers',
   'event_photos',
 ] as const;
-
-const CAPTURE_TABLES = ['events', 'event_questions', 'interviewees', 'answers', 'event_photos'];
 
 // Every pull table carries a server-side updated_at (set by trigger), so pulls
 // can be incremental. sync_state stores the high-water mark per table.
@@ -73,11 +64,6 @@ async function mergeRow(
   );
 }
 
-async function activeTeamIds(): Promise<Set<string>> {
-  const rows = await all<{ id: string }>(`SELECT id FROM team_members WHERE is_active=1`);
-  return new Set(rows.map((r) => r.id));
-}
-
 export async function pullAll(): Promise<number> {
   const db = await getDb();
   let merged = 0;
@@ -85,8 +71,6 @@ export async function pullAll(): Promise<number> {
   for (const table of PULL_TABLES) {
     const skip = await pendingIds(table);
     const since = await lastPulledAt(table);
-    const before = table === 'team_members' ? await activeTeamIds() : null;
-
     let query = supabase.from(table).select('*');
     if (since) query = query.gt('updated_at', since);
     const { data, error } = await query;
@@ -106,19 +90,6 @@ export async function pullAll(): Promise<number> {
     // newer (pending push) and will round-trip through the outbox anyway.
     if (maxUpdatedAt && maxUpdatedAt !== since) {
       await setLastPulledAt(table, maxUpdatedAt);
-    }
-
-    // Roster grew → forget the capture-table marks so the loop below pulls
-    // the newcomers' whole history (mergeRow still honours pending rows).
-    if (before) {
-      const after = await activeTeamIds();
-      const grew = [...after].some((id) => !before.has(id));
-      if (grew) {
-        await db.runAsync(
-          `DELETE FROM sync_state WHERE table_name IN (${CAPTURE_TABLES.map(() => '?').join(',')})`,
-          CAPTURE_TABLES,
-        );
-      }
     }
   }
   return merged;

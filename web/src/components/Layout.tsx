@@ -1,10 +1,8 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { useAuth } from '../lib/auth';
 import { SUPPORT_EMAIL } from '@fixtures/legal';
 
 export default function Layout() {
-  const { session, signOut } = useAuth();
   return (
     <>
       <header className="masthead">
@@ -15,18 +13,6 @@ export default function Layout() {
             </Link>
             <div className="byline">By Investigations Differently</div>
           </div>
-          <nav>
-            <Link to="/billing">{session ? 'Your account' : 'Sign in'}</Link>
-            {session && (
-              <button
-                type="button"
-                onClick={() => void signOut()}
-                style={{ background: 'none', border: 0, padding: 0, marginLeft: 18, font: 'inherit', fontWeight: 600, fontSize: 13, color: 'var(--teal-light)', cursor: 'pointer' }}
-              >
-                Sign out
-              </button>
-            )}
-          </nav>
         </div>
       </header>
       <main className="container">

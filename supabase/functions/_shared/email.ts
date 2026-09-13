@@ -73,64 +73,27 @@ export function layout(title: string, bodyHtml: string): string {
 </body></html>`;
 }
 
-export function button(label: string, href: string): string {
-  return `<p style="margin:22px 0"><a href="${href}" style="display:inline-block;background:#E4772A;color:#FFFFFF;text-decoration:none;font-family:Archivo,Helvetica,Arial,sans-serif;font-weight:700;font-size:14px;padding:13px 22px;border-radius:12px">${escapeHtml(label)}</a></p>`;
-}
 
 // --- Templates ---------------------------------------------------------------
 
 export function welcomeIapEmail(opts: {
   name: string | null;
-  store: 'apple' | 'google' | 'stripe' | 'manual';
+  store: 'apple' | 'google' | 'manual';
   trial: boolean;
 }): { subject: string; html: string } {
   const storeName =
     opts.store === 'apple' ? 'Apple' : opts.store === 'google' ? 'Google Play' : 'your payment provider';
   const hello = opts.name ? `Hi ${escapeHtml(opts.name)},` : 'Hi,';
   return {
-    subject: opts.trial ? 'Your Event Insight trial has started' : 'Welcome to Event Insight',
+    subject: 'Welcome to Event Insight',
     html: layout(
-      opts.trial ? 'Your free trial has started' : 'Welcome to Event Insight',
+      'Welcome to Event Insight',
       `<p>${hello}</p>
-       <p>${
-         opts.trial
-           ? 'Your 7-day free trial of the Event Insight Individual plan is active. Nothing is charged until the trial ends, and you can cancel any time before then.'
-           : 'Your Event Insight Individual plan is active.'
-       }</p>
+       <p>Your Event Insight subscription is active.</p>
        <p>Because you subscribed through ${storeName}, ${storeName} is the merchant for this purchase and will email you the receipt and tax invoice for each payment. You can manage or cancel the subscription from your device's subscription settings.</p>
        <p>Any questions, reply to this email.</p>`,
     ),
   };
 }
 
-export function inviteEmail(opts: {
-  orgName: string;
-  inviterName: string;
-  link: string;
-  expiresDays: number;
-}): { subject: string; html: string; text: string } {
-  return {
-    subject: `${opts.inviterName} invited you to Event Insight`,
-    html: layout(
-      `Join ${escapeHtml(opts.orgName)} on Event Insight`,
-      `<p><strong>${escapeHtml(opts.inviterName)}</strong> has invited you to join <strong>${escapeHtml(opts.orgName)}</strong>'s team on Event Insight, the app for recording and learning from field interviews.</p>
-       <p>Accept the invitation to set up your account, then download the app and sign in.</p>
-       ${button('Accept invitation', opts.link)}
-       <p style="font-size:12.5px;color:#8A9499">This link expires in ${opts.expiresDays} days. If you were not expecting it, you can ignore this email.</p>`,
-    ),
-    text: `${opts.inviterName} has invited you to join ${opts.orgName}'s team on Event Insight. Accept the invitation here: ${opts.link} (expires in ${opts.expiresDays} days).`,
-  };
-}
 
-export function removedFromTeamEmail(opts: {
-  orgName: string;
-}): { subject: string; html: string } {
-  return {
-    subject: `Your Event Insight access for ${opts.orgName} has ended`,
-    html: layout(
-      'Your team access has ended',
-      `<p>Your supervisor has removed your account from <strong>${escapeHtml(opts.orgName)}</strong>'s Event Insight team, so you can no longer sign in.</p>
-       <p>The events and reports you recorded remain with your organisation. If you think this was a mistake, contact your supervisor.</p>`,
-    ),
-  };
-}

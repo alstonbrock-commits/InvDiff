@@ -1,46 +1,37 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, Text, Pressable, Platform, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Redirect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { ScreenHeader, Button, Eyebrow, showDialog, alertDialog } from '@/components';
-import { useAuth } from '@/lib/auth';
-import { useSyncStatus } from '@/lib/sync/SyncProvider';
 import { useEntitlement } from '@/lib/entitlement';
-import { ROUTES, useGate } from '@/lib/gate';
 import {
   billingAvailable,
-  describeFreeTrial,
   fetchIndividualPackage,
   hasIndividualEntitlement,
+  openManageSubscriptions,
   purchaseIndividual,
   restorePurchases,
 } from '@/lib/billing';
 
-// ROOT-level interstitial: shown to a signed-in individual account with no
-// active plan. Lives outside (auth) because a session exists, and outside
-// (tabs) because the app is not usable yet.
+// The subscribe screen, opened on demand (locked actions, Account tab). Not
+// an interstitial: everyone gets into the app, generates one report free,
+// and lands here when they want more.
 //
-// STORE POLICY: the only purchase path offered here is the platform's own
-// in-app purchase. No links, prices or hints about buying anywhere else —
-// enterprise seats are provisioned outside the app and are mentioned only as
-// "ask your supervisor for an invite".
+// STORE POLICY: the only purchase path is the platform's own in-app
+// purchase. No links, prices or hints about buying anywhere else.
 
 const FEATURES = [
+  'Unlimited insight reports',
   'Unlimited events and interviews',
   'Record on site, fully offline — audio uploads when you are back in range',
   'Automatic transcription with a review step before anything is used',
-  'AI-written, de-identified insight reports with a shareable PDF',
 ];
 
 export default function Paywall() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const gate = useGate();
-  const { signOut } = useAuth();
   const ent = useEntitlement();
-  const sync = useSyncStatus();
-  const [checking, setChecking] = useState(false);
 
   const [pkg, setPkg] = useState<PurchasesPackage | null>(null);
   const [loadingPkg, setLoadingPkg] = useState(true);
@@ -56,14 +47,12 @@ export default function Paywall() {
     void loadPackage();
   }, [loadPackage]);
 
-  // Purchased / restored / plan arrived from elsewhere → the gate moves on.
-  if (gate.target && gate.target !== ROUTES.paywall) return <Redirect href="/" />;
-
   // Only ever quote the store's own price — never a hard-coded one, which
   // would be wrong outside Australia.
   const price = pkg?.product.priceString ?? null;
-  const trial = pkg ? describeFreeTrial(pkg.product) : null;
   const storeName = Platform.OS === 'ios' ? 'App Store' : 'Google Play';
+  const subscribed = ent.active && (ent.entitlement?.kind === 'individual' || ent.storeUnlocked);
+  const freeAvailable = ent.entitlement?.kind === 'free';
 
   const buy = async () => {
     if (!pkg || busy) return;
@@ -72,6 +61,13 @@ export default function Paywall() {
       const info = await purchaseIndividual(pkg);
       if (info && hasIndividualEntitlement(info)) {
         await ent.refresh();
+        showDialog({
+          variant: 'success',
+          title: 'Subscription active',
+          body: 'Welcome aboard — reports are unlimited from here.',
+          confirmLabel: 'Continue',
+          onConfirm: () => router.back(),
+        });
       }
     } catch (e) {
       alertDialog('Purchase did not complete', e instanceof Error ? e.message : String(e));
@@ -90,8 +86,9 @@ export default function Paywall() {
         showDialog({
           variant: 'success',
           title: 'Subscription restored',
-          body: 'Your Individual plan is active on this device.',
+          body: 'Your plan is active on this device.',
           confirmLabel: 'Continue',
+          onConfirm: () => router.back(),
         });
       } else {
         alertDialog(
@@ -106,33 +103,11 @@ export default function Paywall() {
     }
   };
 
-  // Signing out wipes the device. A field worker whose plan lapsed with
-  // recordings still queued must know they are about to lose them.
-  const pendingWork = (sync?.pendingRows ?? 0) + (sync?.pendingUploads ?? 0);
-  const confirmSignOut = () =>
-    showDialog({
-      variant: 'confirm',
-      title: 'Sign out',
-      body:
-        pendingWork > 0
-          ? `${pendingWork} item${pendingWork === 1 ? '' : 's'} recorded on this device have not reached the server yet and will be deleted. Subscribe first to sync them, or sign out and lose them.`
-          : 'You can sign back in any time.',
-      cancelLabel: 'Cancel',
-      confirmLabel: pendingWork > 0 ? 'Sign out and delete' : 'Sign out',
-      onConfirm: () => void signOut(),
-    });
-
-  const checkAgain = async () => {
-    setChecking(true);
-    await ent.refresh();
-    setChecking(false);
-  };
-
-  const canBuy = billingAvailable() && !!pkg && !busy;
+  const canBuy = billingAvailable() && !!pkg && !busy && !subscribed;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F6F5F1' }}>
-      <ScreenHeader variant="brand" showWatermark />
+      <ScreenHeader variant="titled" title="Subscribe" onBack={() => router.back()} />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -143,9 +118,8 @@ export default function Paywall() {
           gap: 12,
         }}
       >
-        <Eyebrow>Choose your plan</Eyebrow>
+        <Eyebrow>One plan, everything included</Eyebrow>
 
-        {/* Plan card */}
         <View
           style={{
             backgroundColor: '#FFFFFF',
@@ -156,30 +130,6 @@ export default function Paywall() {
             gap: 12,
           }}
         >
-          <View>
-            <Text
-              style={{
-                fontFamily: 'Archivo-800',
-                fontSize: 22,
-                letterSpacing: -0.44,
-                color: '#17262D',
-              }}
-            >
-              Individual
-            </Text>
-            <Text
-              style={{
-                fontFamily: 'PublicSans-400',
-                fontSize: 13,
-                lineHeight: 18,
-                color: '#5D6B70',
-                marginTop: 2,
-              }}
-            >
-              For one investigator running their own events.
-            </Text>
-          </View>
-
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
             <Text
               style={{
@@ -198,21 +148,34 @@ export default function Paywall() {
             )}
           </View>
 
-          {trial && (
-            <View
+          {/* Where this account stands */}
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              backgroundColor: subscribed
+                ? 'rgba(44,165,192,0.14)'
+                : freeAvailable
+                  ? 'rgba(44,165,192,0.14)'
+                  : 'rgba(228,119,42,0.12)',
+              borderRadius: 8,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+            }}
+          >
+            <Text
               style={{
-                alignSelf: 'flex-start',
-                backgroundColor: 'rgba(44,165,192,0.14)',
-                borderRadius: 8,
-                paddingHorizontal: 10,
-                paddingVertical: 5,
+                fontFamily: 'PublicSans-600',
+                fontSize: 12,
+                color: subscribed || freeAvailable ? '#1E7F94' : '#E4772A',
               }}
             >
-              <Text style={{ fontFamily: 'PublicSans-600', fontSize: 12, color: '#1E7F94' }}>
-                {trial}{price ? ` — then ${price}/month` : ''}
-              </Text>
-            </View>
-          )}
+              {subscribed
+                ? 'Your subscription is active'
+                : freeAvailable
+                  ? 'Your first report is free — subscribe when you need more'
+                  : 'Your free report has been used'}
+            </Text>
+          </View>
 
           <View style={{ gap: 7, marginTop: 2 }}>
             {FEATURES.map((f) => (
@@ -242,7 +205,15 @@ export default function Paywall() {
           </View>
 
           <View style={{ marginTop: 6, gap: 8 }}>
-            {loadingPkg ? (
+            {subscribed ? (
+              <Button
+                variant="secondary"
+                fullWidth
+                onPress={() => void openManageSubscriptions().catch(() => {})}
+              >
+                Manage subscription
+              </Button>
+            ) : loadingPkg ? (
               <View
                 style={{
                   backgroundColor: '#E4772A',
@@ -256,25 +227,23 @@ export default function Paywall() {
               </View>
             ) : (
               <Button variant="primary" fullWidth disabled={!canBuy} onPress={() => void buy()}>
-                {busy === 'buy'
-                  ? 'Waiting for the store…'
-                  : trial
-                    ? 'Start free trial'
-                    : 'Subscribe'}
+                {busy === 'buy' ? 'Waiting for the store…' : 'Subscribe'}
               </Button>
             )}
-            <Button
-              variant="secondary"
-              size="sm"
-              fullWidth
-              disabled={!!busy || !billingAvailable()}
-              onPress={() => void restore()}
-            >
-              {busy === 'restore' ? 'Checking…' : 'Restore purchases'}
-            </Button>
+            {!subscribed && (
+              <Button
+                variant="secondary"
+                size="sm"
+                fullWidth
+                disabled={!!busy || !billingAvailable()}
+                onPress={() => void restore()}
+              >
+                {busy === 'restore' ? 'Checking…' : 'Restore purchases'}
+              </Button>
+            )}
           </View>
 
-          {!loadingPkg && (!billingAvailable() || !pkg) && (
+          {!subscribed && !loadingPkg && (!billingAvailable() || !pkg) && (
             <View style={{ gap: 8 }}>
               <Text
                 style={{
@@ -299,37 +268,6 @@ export default function Paywall() {
           )}
         </View>
 
-        {/* Team members never buy here — their seat comes from an invite. */}
-        <View
-          style={{
-            backgroundColor: '#EFEDE7',
-            borderRadius: 12,
-            padding: 13,
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: 'PublicSans-600',
-              fontSize: 13,
-              color: '#17262D',
-            }}
-          >
-            Part of a team?
-          </Text>
-          <Text
-            style={{
-              fontFamily: 'PublicSans-400',
-              fontSize: 12.5,
-              lineHeight: 18,
-              color: '#5D6B70',
-              marginTop: 3,
-            }}
-          >
-            Ask your supervisor for an invite. You will receive an email with a link, and
-            your seat is ready as soon as you accept it — nothing to buy here.
-          </Text>
-        </View>
-
         {/* Mandatory subscription disclosures */}
         <Text
           style={{
@@ -340,12 +278,12 @@ export default function Paywall() {
             marginTop: 4,
           }}
         >
-          Payment is charged to your {storeName} account when you confirm the purchase
-          {trial ? ', after the free trial ends' : ''}. The subscription renews automatically
-          each month{price ? ` at ${price}` : ' at the price shown by the store'} unless it is
-          cancelled at least 24 hours before the end of the current period. You can manage or cancel it in your {storeName} subscription
-          settings at any time. Prices are shown in your store's currency and include GST
-          where it applies.
+          Payment is charged to your {storeName} account when you confirm the purchase. The
+          subscription renews automatically each month{price ? ` at ${price}` : ' at the price shown by the store'} unless
+          it is cancelled at least 24 hours before the end of the current period. You can manage
+          or cancel it in your {storeName} subscription settings at any time. {storeName} issues
+          the receipt and tax invoice for each payment. Prices are shown in your store's currency
+          and include GST where it applies.
         </Text>
 
         <View style={{ flexDirection: 'row', gap: 16, justifyContent: 'center', marginTop: 2 }}>
@@ -359,18 +297,6 @@ export default function Paywall() {
               Privacy policy
             </Text>
           </Pressable>
-        </View>
-
-        {/* A plan bought elsewhere (web) or a slow first read: re-ask the server. */}
-        <View style={{ marginTop: 6 }}>
-          <Button variant="secondary" size="sm" fullWidth disabled={checking} onPress={() => void checkAgain()}>
-            {checking ? 'Checking…' : 'Already subscribed? Check again'}
-          </Button>
-        </View>
-        <View style={{ marginTop: 4 }}>
-          <Button variant="danger-ghost" size="sm" fullWidth onPress={confirmSignOut}>
-            Sign out
-          </Button>
         </View>
       </ScrollView>
     </View>

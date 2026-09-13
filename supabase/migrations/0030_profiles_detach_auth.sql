@@ -1,27 +1,25 @@
 -- =============================================================================
--- 0030: let a profile outlive its auth user (account deletion), and keep the
--- rest of the schema honest about it.
+-- 0030: let a profile outlive its auth user (account deletion).
 --
 -- profiles.id cascaded from auth.users, while events.owner_id (and
 -- transcripts.approved_by, exports.generated_by, audit_log.actor_id,
--- admin_notifications.facilitator_id, organisations.owner_id) reference
--- profiles with the default RESTRICT. Deleting the auth user of anyone who
--- owns an event therefore failed outright.
+-- admin_notifications.facilitator_id) reference profiles with the default
+-- RESTRICT. Deleting the auth user of anyone who owned an event therefore
+-- failed outright. delete-account removes the user's events first, but rows
+-- like audit_log entries legitimately outlive the account, so the profile
+-- row stays (scrubbed of personal details) while the auth user goes.
 --
--- Enterprise members' events belong to the organisation and must survive the
--- member deleting their account, so the profile row has to stay (scrubbed of
--- personal details) while the auth user goes. Dropping the FK is what allows
--- that. Because the FK was also the only thing that kept profiles in step
--- with auth.users on EVERY deletion path (dashboard "Delete user", operator
--- SQL, future functions), a trigger now scrubs the profile whenever the auth
--- row is removed — delete-account no longer has to be the only careful path.
+-- Because the FK was also the only thing that kept profiles in step with
+-- auth.users on EVERY deletion path (dashboard "Delete user", operator SQL,
+-- future functions), a trigger now scrubs the profile whenever the auth row
+-- is removed — delete-account is no longer the only careful path.
 -- =============================================================================
 
 alter table profiles drop constraint if exists profiles_id_fkey;
 
 alter table profiles add column if not exists deleted_at timestamptz;
 
--- Scrub on auth deletion: no PII left, no seat held, nothing to sign in with.
+-- Scrub on auth deletion: no PII left, nothing to sign in with.
 create or replace function handle_deleted_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
@@ -32,7 +30,6 @@ begin
     newsletter_opt_in = false,
     newsletter_opt_in_at = null,
     is_active = false,
-    org_role = null,
     onboarded_at = null,
     deleted_at = coalesce(deleted_at, now())
   where id = old.id;
@@ -149,44 +146,3 @@ language sql stable as $$
   )
   from t;
 $$;
-
--- The team roster must not list scrubbed accounts either.
-create or replace view team_members
-with (security_invoker = true) as
-select id, full_name, email, job_title, org_role, is_active, updated_at
-from profiles
-where org_id is not null and deleted_at is null;
-
--- has_active_plan_for(uuid) is called only by Edge Functions with the service
--- role; as a SECURITY DEFINER function in public it would otherwise let any
--- signed-in caller probe another account's plan.
-revoke execute on function has_active_plan_for(uuid) from public, anon, authenticated;
-grant execute on function has_active_plan_for(uuid) to service_role;
-
--- Visibility of a member's rows follows the member's org_id, but the
--- supervisor's device pulls incrementally by updated_at. When someone joins an
--- organisation with pre-existing events, bump those rows so they cross the
--- supervisor's high-water mark.
-create or replace function touch_owned_rows_on_org_change() returns trigger
-language plpgsql security definer set search_path = public as $$
-begin
-  if new.org_id is distinct from old.org_id then
-    update events set updated_at = now() where owner_id = new.id;
-    update event_questions q set updated_at = now()
-      from events e where e.id = q.event_id and e.owner_id = new.id;
-    update interviewees i set updated_at = now()
-      from events e where e.id = i.event_id and e.owner_id = new.id;
-    update answers a set updated_at = now()
-      from interviewees i join events e on e.id = i.event_id
-      where i.id = a.interviewee_id and e.owner_id = new.id;
-    update event_photos p set updated_at = now()
-      from events e where e.id = p.event_id and e.owner_id = new.id;
-  end if;
-  return new;
-end;
-$$;
-
-drop trigger if exists trg_profiles_org_change on profiles;
-create trigger trg_profiles_org_change
-  after update of org_id on profiles
-  for each row execute function touch_owned_rows_on_org_change();
