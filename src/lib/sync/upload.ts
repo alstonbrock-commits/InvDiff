@@ -118,11 +118,24 @@ export async function drainUploads(): Promise<{ audio: number; sigs: number }> {
       });
       audio++;
 
-      // Trigger transcription (best-effort; the job is idempotent).
-      try {
-        await callFunction('transcribe', { answer_id: a.id });
-      } catch {
-        // transcription can be retried later; upload already succeeded
+      // Trigger transcription (best-effort; the job is idempotent). Skip it
+      // while this answer's own row is still queued in the outbox — the server
+      // would 404 (the row isn't there yet) and this call fires only once.
+      // The approve screen re-requests transcription for uploaded answers the
+      // server has no transcript for, so a skipped or failed call here heals.
+      const queued = await all<{ c: number }>(
+        `SELECT COUNT(*) c FROM sync_outbox WHERE row_id=? AND status!='done'`,
+        [a.id],
+      );
+      if ((queued[0]?.c ?? 0) === 0) {
+        try {
+          await callFunction('transcribe', { answer_id: a.id });
+        } catch (e) {
+          console.warn(
+            `transcribe request failed for ${a.id} — the approve screen will re-request it`,
+            e,
+          );
+        }
       }
     } catch (e) {
       await db.runAsync(

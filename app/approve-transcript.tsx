@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, ScrollView, Text, Pressable, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -22,6 +22,7 @@ import {
   type TranscriptDetail,
 } from '@/lib/remote';
 import { isOfflineError, startInsightGeneration } from '@/lib/insightFlow';
+import { callFunction } from '@/lib/supabase';
 
 function TranscriptText({ detail }: { detail: TranscriptDetail }) {
   return (
@@ -126,6 +127,35 @@ export default function ApproveTranscript() {
       .filter((t) => myAnswerIds.has(t.answer_id))
       .sort((a, b) => a.question_position - b.question_position);
   }, [transcriptsQuery.data, myAnswerIds]);
+
+  // Recovery: transcription is requested exactly once, right after the audio
+  // uploads — if that call is lost (offline blip, or the answer row hadn't
+  // reached the server yet), nothing asks again and this screen would wait
+  // forever. While it polls, re-request transcription for uploaded answers
+  // the server has no transcript row for. The function is idempotent, so a
+  // duplicate request is harmless.
+  const lastKickAt = useRef(0);
+  useEffect(() => {
+    const rows = transcriptsQuery.data;
+    const answers = local?.allAnswers;
+    if (!rows || !answers) return;
+    const have = new Set(rows.map((t) => t.answer_id));
+    const missing = answers.filter(
+      (a) =>
+        a.interviewee_id === intervieweeId &&
+        a.upload_status === 'uploaded' &&
+        !have.has(a.id),
+    );
+    if (missing.length === 0) return;
+    const now = Date.now();
+    if (now - lastKickAt.current < 15000) return;
+    lastKickAt.current = now;
+    for (const a of missing) {
+      callFunction('transcribe', { answer_id: a.id }).catch((e) =>
+        console.warn(`transcribe re-request failed for ${a.id}`, e),
+      );
+    }
+  }, [transcriptsQuery.data, local?.allAnswers, intervieweeId]);
 
   const readyCount = mine.filter((t) => ['done', 'approved'].includes(t.status)).length;
   const expected = local?.mineCount ?? 0;
