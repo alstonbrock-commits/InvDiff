@@ -20,7 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: false,
     bundleIdentifier: BUNDLE_ID,
-    buildNumber: '1',
+    buildNumber: '2',
     // Sign in with Apple — mandatory on iOS once Google sign-in is offered.
     usesAppleSignIn: true,
     // Required-reason APIs used by our dependencies (AsyncStorage/UserDefaults,
@@ -53,7 +53,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: BUNDLE_ID,
-    versionCode: 1,
+    versionCode: 2,
     permissions: ['RECORD_AUDIO', 'INTERNET'],
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
