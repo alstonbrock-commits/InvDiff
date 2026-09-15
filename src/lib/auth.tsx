@@ -12,6 +12,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import * as Crypto from 'expo-crypto';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import { router } from 'expo-router';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { LAST_USER_KEY, resetLocalDb } from './db';
@@ -374,9 +375,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // account, and a different user may sign in next on a shared field device.
   const signOut = useCallback(async () => {
     await logOutBilling();
-    await supabase.auth.signOut();
+    // supabase-js reports failures as { error }, not a throw — and on a
+    // failed global sign-out the local session survives, which used to leave
+    // the UI signed in with no feedback. Fall back to a local-only sign-out
+    // so this device always ends up signed out, even offline.
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      const { error: localErr } = await supabase.auth.signOut({ scope: 'local' });
+      if (localErr) throw localErr;
+    }
     queryClient.clear();
     await resetLocalDb();
+    // Belt-and-braces: the declarative redirects normally handle this, but a
+    // race between the two layouts' <Redirect>s once stranded a blank scene.
+    // (Literal path — importing ROUTES from ./gate would be a require cycle.)
+    router.replace('/(auth)/login');
   }, []);
 
   return (

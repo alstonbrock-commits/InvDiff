@@ -101,9 +101,18 @@ CREATE TABLE IF NOT EXISTS event_photos (
 );
 CREATE INDEX IF NOT EXISTS idx_photos_event ON event_photos(event_id);
 `,
-  // 2 — consent capture removed (server migration 0013). Drops the local table
-  // and any queued signature rows on devices that had it.
+  // 2 — consent capture removed (server migration 0013). The server table is
+  // gone, so queued consent rows can never sync — but a signature is a legal
+  // record, so nothing is destroyed: the table rows and any queued outbox
+  // payloads are copied into local archive tables before the feature's data
+  // is dropped. Support can extract the archives from a device if a record
+  // is ever needed. (The bare CREATE first makes the copy safe on fresh
+  // installs whose base schema never had the table.)
   `
+CREATE TABLE IF NOT EXISTS consents (id TEXT);
+CREATE TABLE IF NOT EXISTS consents_archive AS SELECT * FROM consents;
+CREATE TABLE IF NOT EXISTS consents_outbox_archive AS
+  SELECT payload, created_at FROM sync_outbox WHERE table_name = 'consents';
 DELETE FROM sync_outbox WHERE table_name = 'consents';
 DROP TABLE IF EXISTS consents;
 `,

@@ -257,19 +257,28 @@ export default function ApproveTranscript() {
       return;
     }
 
-    // Roster members who were never interviewed: generating now leaves them
-    // out — make that a decision, not a surprise.
+    // Roster members with unanswered questions: generating now leaves those
+    // answers out — make that a decision, not a surprise. Someone with SOME
+    // answers is described accurately (their recorded answers ARE included).
+    const questionCount = local?.questions.length ?? 0;
+    const answeredBy = (personId: string) =>
+      local?.allAnswers.filter(
+        (a) => a.interviewee_id === personId && a.recorded_at,
+      ).length ?? 0;
     const outstanding = (local?.people ?? []).filter(
-      (p) =>
-        (local?.allAnswers.filter(
-          (a) => a.interviewee_id === p.id && a.recorded_at,
-        ).length ?? 0) < (local?.questions.length ?? 0),
+      (p) => answeredBy(p.id) < questionCount,
     );
     if (outstanding.length > 0) {
+      const parts = outstanding.map((p) => {
+        const n = answeredBy(p.id);
+        return n === 0
+          ? `${p.name} has not been interviewed`
+          : `${p.name} has answered ${n} of ${questionCount} questions`;
+      });
       showDialog({
         variant: 'confirm',
         title: 'Generate without everyone?',
-        body: `${outstanding.map((p) => p.name).join(', ')} ${outstanding.length === 1 ? 'has' : 'have'} not been interviewed — their answers won't be in the report. Generate anyway, or go back and remove them from the roster.`,
+        body: `${parts.join('; ')}. Unanswered questions won't be in the report. Generate anyway, or go back to finish the interviews first.`,
         cancelLabel: 'Go back',
         confirmLabel: 'Generate anyway',
         onCancel: () => router.back(),

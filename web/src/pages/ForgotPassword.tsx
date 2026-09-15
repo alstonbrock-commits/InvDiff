@@ -69,8 +69,8 @@ export default function ForgotPassword() {
       )}
       {step === 'done' && (
         <>
-          <p>Password updated — you are signed in.</p>
-          <Link className="btn primary" to="/billing">Go to your account</Link>
+          <p>Password updated. Open the Event Insight app and sign in with your new password.</p>
+          <Link className="btn primary" to="/">Back to the website</Link>
         </>
       )}
     </div>

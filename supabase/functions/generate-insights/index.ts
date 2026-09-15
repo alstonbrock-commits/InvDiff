@@ -84,24 +84,31 @@ Deno.serve(async (req) => {
     // Synthesis is the expensive step — refuse it for a lapsed plan.
     await assertActivePlan(db, ev.owner_id);
 
-    // Don't queue a second run on top of one already in flight.
-    const { data: inFlight } = await db
-      .from('ai_jobs')
-      .select('id')
-      .eq('event_id', event_id)
-      .eq('type', 'insights')
-      .in('status', ['queued', 'processing'])
-      .gte('created_at', new Date(Date.now() - 15 * 60_000).toISOString())
-      .limit(1);
-    if (inFlight && inFlight.length > 0) {
-      return json({ ok: true, job_id: inFlight[0].id, status: 'processing' }, 202);
-    }
-
+    // Claim the job by inserting first: a partial unique index (0031) allows
+    // only one active insights job per event, so two concurrent requests can
+    // never both start — the loser gets the winner's job id back. (The stale
+    // 'processing' reaper from 0018 still clears wedged rows.)
     const jobRes = await db
       .from('ai_jobs')
       .insert({ event_id, type: 'insights', status: 'processing' })
       .select('id')
       .single();
+    if (jobRes.error) {
+      if (jobRes.error.code === '23505') {
+        const { data: active } = await db
+          .from('ai_jobs')
+          .select('id')
+          .eq('event_id', event_id)
+          .eq('type', 'insights')
+          .in('status', ['queued', 'processing'])
+          .limit(1);
+        return json(
+          { ok: true, job_id: active?.[0]?.id ?? null, status: 'processing' },
+          202,
+        );
+      }
+      return json({ error: jobRes.error.message }, 500);
+    }
     const jobId = jobRes.data?.id;
 
     // Synthesis takes about a minute — far too long to hold an HTTP request
@@ -134,6 +141,9 @@ async function runInsights(
   jobId: string | undefined,
 ): Promise<void> {
   {
+    // Free-credit claim state — the catch block reverts exactly our stamp.
+    let creditClaimed = false;
+    let creditStamp: string | null = null;
     try {
       // The facilitator is the only person who may be named in the report.
       const { data: owner } = await db
@@ -173,7 +183,12 @@ async function runInsights(
         const ans = (r as any).answers;
         const pos = qPos.get(ans.event_question_id);
         if (!pos) continue;
-        if (r.status !== 'approved') unapproved++;
+        // The approval step is the boundary: text that no one has signed off
+        // must never reach the synthesis prompt, whatever the client sent.
+        if (r.status !== 'approved') {
+          unapproved++;
+          continue;
+        }
         const text = (r.edited_text ?? r.text ?? '').trim();
         if (!text) continue;
         people.add(ans.interviewees.name);
@@ -182,6 +197,46 @@ async function runInsights(
           transcript_id: r.id,
           text,
         });
+      }
+
+      if (people.size === 0) {
+        if (jobId) {
+          await db
+            .from('ai_jobs')
+            .update({ status: 'error', error: 'no approved transcripts', payload: { unapproved } })
+            .eq('id', jobId);
+        }
+        return;
+      }
+
+      // Spend the free credit atomically BEFORE the expensive synthesis call:
+      // two concurrent generations (different events) both passing the earlier
+      // eligibility check could otherwise ride on one credit. The stamp means
+      // "has generated at least one report", so it is set for subscribers too;
+      // if this run fails the catch block below returns exactly this stamp.
+      creditStamp = new Date().toISOString();
+      const { data: claimedRows } = await db
+        .from('profiles')
+        .update({ free_report_used_at: creditStamp })
+        .eq('id', ev.owner_id)
+        .is('free_report_used_at', null)
+        .select('id');
+      creditClaimed = (claimedRows ?? []).length > 0;
+      if (!creditClaimed) {
+        // Credit already spent — only an active subscription (or admin) may
+        // proceed to a paid synthesis run.
+        const { data: active } = await db.rpc('has_active_plan_for', {
+          p_user: ev.owner_id,
+        });
+        if (active !== true) {
+          if (jobId) {
+            await db
+              .from('ai_jobs')
+              .update({ status: 'error', error: 'subscription_required' })
+              .eq('id', jobId);
+          }
+          return;
+        }
       }
 
       const eventDate = ev.occurred_at ?? ev.created_at;
@@ -215,13 +270,16 @@ async function runInsights(
       });
 
       // ---- Persist -------------------------------------------------------
-      // Replace the previous report so regeneration after a correction is
-      // idempotent (insights cascade-delete their recommendations).
-      await db.from('insights').delete().eq('event_id', event_id);
+      // One transaction (replace_event_report, migration 0031): the old
+      // report is only gone if the new one fully lands. A thrown error here
+      // routes to the catch block — the job records the failure, the free
+      // credit is returned, and the audio purge below is never reached.
+      const insights = (out.key_event_insights ?? []).slice(0, maxInsights);
+      const recs = (out.key_learning_recommendations ?? []).slice(0, 3);
 
-      await db.from('event_reports').upsert(
-        {
-          event_id,
+      const { error: persistErr } = await db.rpc('replace_event_report', {
+        p_event_id: event_id,
+        p_report: {
           event_description: out.event_description ?? '',
           executive_summary: out.executive_summary_of_learnings ?? '',
           limitations: out.limitations_and_validation_needs || null,
@@ -232,77 +290,30 @@ async function runInsights(
           interviews_reviewed: people.size,
           roles_reviewed: out.roles_or_workgroups_reviewed ?? [],
           generated_by_model: CLAUDE_MODEL,
-          generated_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
         },
-        { onConflict: 'event_id' },
-      );
-
-      // Maximum limits are not targets — the model returns what the evidence
-      // supports; we only enforce the ceiling.
-      const insights = (out.key_event_insights ?? []).slice(0, maxInsights);
-      const idByNumber = new Map<number, string>();
-
-      for (let i = 0; i < insights.length; i++) {
-        const ins = insights[i];
-        const { data: insRow, error: insErr } = await db
-          .from('insights')
-          .insert({
-            event_id,
-            position: i + 1,
-            title: ins.title,
-            body: ins.insight,
-            theme: ins.theme,
-            system_significance: ins.system_significance,
-            supporting_examples: (ins.supporting_examples_or_patterns ?? []).map(
-              (e) => ({
-                text: e.example_or_quote,
-                include_in_report: e.include_in_final_report !== false,
-              }),
-            ),
-            status: 'draft',
-            generated_by_model: CLAUDE_MODEL,
-            generated_at: new Date().toISOString(),
-          })
-          .select('id')
-          .single();
-        if (insErr || !insRow) continue;
-        idByNumber.set(ins.insight_number, insRow.id);
-      }
-
-      // Three recommendations across the whole report, not per insight.
-      const recs = (out.key_learning_recommendations ?? []).slice(0, 3);
-      const fallbackInsightId = idByNumber.values().next().value as
-        | string
-        | undefined;
-      const toInsert = recs
-        .map((r, idx) => {
-          const insightId =
-            idByNumber.get(r.linked_insight_number) ?? fallbackInsightId;
-          if (!insightId) return null;
-          return {
-            insight_id: insightId,
-            body: r.recommended_action,
-            risk_reduction_rationale: r.risk_reduction_rationale,
-            verification_method: r.verification_method,
-            is_option: !!r.is_option_to_consider,
-            position: idx + 1,
-            status: 'draft',
-          };
-        })
-        .filter(Boolean);
-      if (toInsert.length > 0) {
-        await db.from('recommendations').insert(toInsert);
-      }
-
-      // First report generated → the free credit is spent. Stamped for every
-      // account (subscribers included): the column means "has generated at
-      // least one report", which is what the entitlement check reads.
-      await db
-        .from('profiles')
-        .update({ free_report_used_at: new Date().toISOString() })
-        .eq('id', ev.owner_id)
-        .is('free_report_used_at', null);
+        p_insights: insights.map((ins) => ({
+          insight_number: ins.insight_number,
+          title: ins.title,
+          body: ins.insight,
+          theme: ins.theme,
+          system_significance: ins.system_significance,
+          supporting_examples: (ins.supporting_examples_or_patterns ?? []).map(
+            (e) => ({
+              text: e.example_or_quote,
+              include_in_report: e.include_in_final_report !== false,
+            }),
+          ),
+          generated_by_model: CLAUDE_MODEL,
+        })),
+        p_recommendations: recs.map((r) => ({
+          linked_insight_number: r.linked_insight_number,
+          body: r.recommended_action,
+          risk_reduction_rationale: r.risk_reduction_rationale,
+          verification_method: r.verification_method,
+          is_option: !!r.is_option_to_consider,
+        })),
+      });
+      if (persistErr) throw new Error(`report persist failed: ${persistErr.message}`);
 
       if (jobId) {
         await db
@@ -321,6 +332,16 @@ async function runInsights(
         console.error('post-report audio purge failed', event_id, String(purgeErr));
       }
     } catch (e) {
+      // Give the free credit back if this very run claimed it — the report
+      // never materialised, so nothing was spent. Matching on our exact stamp
+      // means a concurrent successful run's stamp is never clobbered.
+      if (creditClaimed && creditStamp) {
+        await db
+          .from('profiles')
+          .update({ free_report_used_at: null })
+          .eq('id', ev.owner_id)
+          .eq('free_report_used_at', creditStamp);
+      }
       if (jobId) {
         await db
           .from('ai_jobs')

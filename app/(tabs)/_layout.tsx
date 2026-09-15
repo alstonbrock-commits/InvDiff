@@ -7,9 +7,13 @@ export default function TabsLayout() {
   const gate = useGate();
 
   // Declarative counterpart to sign-out / deactivation: whenever the gate
-  // points somewhere other than the app, go there. While it is still
-  // deciding (null) stay put — that only happens mid-refresh.
-  if (gate.target && gate.target !== ROUTES.app) return <Redirect href="/" />;
+  // points somewhere other than the app, go there DIRECTLY. Redirecting via
+  // "/" chained two redirects in one commit (tabs → index → login), which
+  // stranded expo-router on a blank scene after sign-out. While the gate is
+  // still deciding (null) stay put — that only happens mid-refresh.
+  if (gate.target && gate.target !== ROUTES.app) {
+    return <Redirect href={gate.target} />;
+  }
 
   return (
     <Tabs

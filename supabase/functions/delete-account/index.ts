@@ -13,7 +13,10 @@ import { handleOptions, json } from '../_shared/cors.ts';
 import { requireUser, serviceClient } from '../_shared/supabase.ts';
 import { audit } from '../_shared/audit.ts';
 
-const BUCKETS = ['audio', 'event-photos', 'exports'];
+// Every bucket that can hold event-scoped personal data. consent-signatures
+// is legacy (feature removed in 0013) but old objects may still exist — the
+// account must be able to take them with it.
+const BUCKETS = ['audio', 'event-photos', 'exports', 'consent-signatures'];
 
 // deno-lint-ignore no-explicit-any
 type Db = any;
@@ -38,10 +41,20 @@ Deno.serve(async (req) => {
 
     await db.from('subscriptions').delete().eq('user_id', user.id);
 
-    // The account takes its data with it.
-    const { data: events } = await db.from('events').select('id').eq('owner_id', user.id);
-    for (const ev of events ?? []) {
-      await purgeEventStorage(db, ev.id);
+    // The account takes its data with it. Storage first, and any failure
+    // aborts BEFORE rows or the auth user are touched: deletion stays
+    // retryable and can never return success while personal objects remain.
+    const { data: events, error: listErr } = await db
+      .from('events')
+      .select('id')
+      .eq('owner_id', user.id);
+    if (listErr) return json({ error: `events list: ${listErr.message}` }, 500);
+    try {
+      for (const ev of events ?? []) {
+        await purgeEventStorage(db, ev.id);
+      }
+    } catch (storageErr) {
+      return json({ error: `storage cleanup failed: ${String(storageErr)}` }, 500);
     }
     const { count, error: evErr } = await db
       .from('events')
@@ -93,13 +106,14 @@ Deno.serve(async (req) => {
 });
 
 // Storage paths are <event_id>/<...>, possibly nested. Walk and remove in
-// batches of 100 (the Storage API's remove limit).
+// batches of 100 (the Storage API's remove limit). Throws on any list or
+// remove failure — the caller aborts the deletion rather than orphan objects.
 async function purgeEventStorage(db: Db, eventId: string): Promise<void> {
   for (const bucket of BUCKETS) {
     const paths = await listRecursive(db, bucket, eventId);
     for (let i = 0; i < paths.length; i += 100) {
       const { error } = await db.storage.from(bucket).remove(paths.slice(i, i + 100));
-      if (error) console.error('storage remove failed', bucket, error.message);
+      if (error) throw new Error(`remove ${bucket}: ${error.message}`);
     }
   }
 }
@@ -109,7 +123,8 @@ async function listRecursive(db: Db, bucket: string, prefix: string): Promise<st
   const PAGE = 1000;
   for (let offset = 0; ; offset += PAGE) {
     const { data, error } = await db.storage.from(bucket).list(prefix, { limit: PAGE, offset });
-    if (error || !data) break;
+    if (error) throw new Error(`list ${bucket}/${prefix}: ${error.message}`);
+    if (!data) break;
     for (const entry of data) {
       const path = `${prefix}/${entry.name}`;
       // Folders come back without an id; files carry one.

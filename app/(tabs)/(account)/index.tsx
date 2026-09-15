@@ -176,7 +176,10 @@ export default function Account() {
       body: 'This removes the local copy of your events from this device. Everything is synced and will be back when you sign in again.',
       cancelLabel: 'Cancel',
       confirmLabel: 'Sign out',
-      onConfirm: () => void signOut(),
+      onConfirm: () =>
+        void signOut().catch((e) =>
+          alertDialog('Could not sign out', String(e)),
+        ),
     });
   };
 
@@ -214,7 +217,10 @@ export default function Account() {
           <>
             <Eyebrow style={{ marginTop: 4 }}>Subscription</Eyebrow>
             <ListCard variant="data" rows={planRows} />
-            {!ent.active && (
+            {(!ent.active || ent.entitlement?.kind === 'free') && (
+              // Shown while the free report is still unused too — a day-one
+              // subscriber shouldn't have to burn the free credit to find
+              // the button.
               <Button variant="primary" size="sm" fullWidth onPress={() => router.push('/paywall')}>
                 Subscribe — unlimited reports
               </Button>
