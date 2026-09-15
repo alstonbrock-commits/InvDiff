@@ -1,8 +1,9 @@
 // purge-event-audio: manual early deletion of ALL audio for a FINALISED event.
-// Owner facilitator or admin only. The export-first safeguard is enforced in the
-// app UI; this function additionally records the action.
+// Owner facilitator or admin only. Since reports auto-purge their audio, this
+// remains as an operator tool for edge cases.
 import { handleOptions, json } from '../_shared/cors.ts';
 import { requireUser, serviceClient } from '../_shared/supabase.ts';
+import { purgeEventAudio } from '../_shared/purgeAudio.ts';
 
 Deno.serve(async (req) => {
   const pre = handleOptions(req);
@@ -34,26 +35,8 @@ Deno.serve(async (req) => {
       return json({ error: 'event must be finalised before deleting recordings' }, 400);
     }
 
-    // Delete storage objects for the event's audio, then stamp rows via RPC.
-    const { data: answers } = await db
-      .from('answers')
-      .select('audio_path, interviewees!inner(event_id)')
-      .eq('interviewees.event_id', event_id)
-      .not('audio_path', 'is', null);
-
-    const paths = (answers ?? [])
-      .map((a) => a.audio_path)
-      .filter((p): p is string => !!p);
-    if (paths.length > 0) {
-      await db.storage.from('audio').remove(paths);
-    }
-
-    const { data: n } = await db.rpc('purge_event_audio', {
-      p_event_id: event_id,
-      p_actor: user.id,
-    });
-
-    return json({ ok: true, purged: n ?? paths.length });
+    const n = await purgeEventAudio(db, event_id, user.id, 'manual');
+    return json({ ok: true, purged: n });
   } catch (e) {
     if (e instanceof Response) return e;
     return json({ error: String(e) }, 500);

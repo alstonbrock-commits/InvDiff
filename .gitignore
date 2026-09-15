@@ -12,3 +12,10 @@ google-play-service-account.json
 ios/
 android/
 .DS_Store
+
+# Design handoff (reference material, not source)
+docs/design-handoff-copy/
+
+# Supabase CLI scratch + Apple signing key holder
+supabase/.temp/
+Keys/

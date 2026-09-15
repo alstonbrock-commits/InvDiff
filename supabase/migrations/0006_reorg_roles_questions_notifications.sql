@@ -49,7 +49,7 @@ where position between 1 and 7;
 
 -- 4. Admin notifications — the in-app feed of logged (finalised) events.
 create table if not exists admin_notifications (
-  id             uuid primary key default uuid_generate_v4(),
+  id             uuid primary key default gen_random_uuid(),
   event_id       uuid references events (id) on delete cascade,
   facilitator_id uuid references profiles (id),
   message        text not null,

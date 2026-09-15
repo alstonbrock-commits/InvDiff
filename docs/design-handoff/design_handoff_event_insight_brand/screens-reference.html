@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Insight — all screens (reference)</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ===== Canonical design tokens — mirrors SPEC.md §1 =====
+     Screen markup below uses literal hex values so this file stays dependency-free;
+     these are the names to map into your project's token system. */
+  :root{
+    --orange:#E4772A;        /* Signal Orange — accent, CTAs, needs-review, active tab */
+    --ink-navy:#1B2B3A;      /* headers, dark surfaces */
+    --ink:#17262D;           /* primary text; darkest screen bg */
+    --scrim:#0F1E24;         /* modal scrim */
+    --teal:#2CA5C0;          /* completed, AI badges, links */
+    --eyebrow-teal:#7FC4D6;  /* mono eyebrow on navy */
+    --paper:#F6F5F1;         /* screen background */
+    --white:#FFFFFF;         /* cards, tab bar */
+    --slate:#5D6B70;         /* secondary text */
+    --muted:#8A9499;         /* tertiary text, mono labels, inactive tab label */
+    --border:#E5E3DC;        /* card borders */
+    --divider:#EFEDE7;       /* inner row dividers */
+    --tab-inactive:#D8DDDE;  /* inactive tab icon */
+    --dashed:#C7C3B9;        /* add affordances, chevrons */
+    --navy-field:#22333F;    /* input fill on navy */
+    --navy-hairline:#33474F; /* dividers on navy */
+    --font-display:'Archivo',sans-serif;
+    --font-body:'Public Sans',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#EFEDE7;font-family:'Public Sans',sans-serif;color:#17262D;padding:56px 40px;}
+  h1{font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-0.02em;margin:0 0 6px 0;}
+  p.lede{font-size:15px;line-height:1.5;color:#5D6B70;max-width:680px;margin:0 auto 40px auto;text-align:center;}
+  header{text-align:center;}
+  .gallery{display:flex;flex-wrap:wrap;gap:48px;justify-content:center;max-width:1600px;margin:0 auto;}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Event Insight — mobile screens</h1>
+    <p class="lede">Every screen at its true size (336&times;720). This file is the visual source of truth for implementation. All colours, sizes and fonts are final and resolved &mdash; no templating, no framework.</p>
+  </header>
+  <div class="gallery">
+
+
+      <!-- 1 · LOGIN -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Login" style="width:336px;height:720px;background:#1B2B3A;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);position:relative;">
+          <img src="assets/id-mark.png" alt="" style="position:absolute;top:18px;left:170px;width:200px;height:200px;object-fit:contain;opacity:0.1;pointer-events:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;height:44px;padding:0 22px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;flex:0 0 auto;position:relative;z-index:1;">
+            <span style="font-weight:500;">9:41</span>
+            <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 26px;position:relative;z-index:1;">
+            <div style="display:flex;align-items:baseline;font-family:'Archivo',sans-serif;font-weight:800;font-size:38px;letter-spacing:-0.02em;line-height:1;">
+              <span style="color:#E4772A;">Event</span><span style="color:#fff;">Insight</span>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:8.5px;text-transform:uppercase;color:#7FC4D6;line-height:1;margin-top:9px;padding-left:2px;">By Investigations Differently</div>
+            <div style="margin-top:44px;display:flex;flex-direction:column;gap:12px;">
+              <div>
+                <div style="font-size:11px;font-weight:600;color:#9FB2B8;margin-bottom:6px;">Email</div>
+                <div style="background:#22333F;border:1px solid #33475266;border-radius:12px;padding:13px 14px;font-size:14px;color:#fff;">j.mercer@investigations.au</div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:600;color:#9FB2B8;margin-bottom:6px;">Password</div>
+                <div style="background:#22333F;border:1px solid #33475266;border-radius:12px;padding:13px 14px;font-size:14px;color:#8A9499;letter-spacing:0.2em;">••••••••••</div>
+              </div>
+            </div>
+            <div style="background:#E4772A;border-radius:12px;padding:15px;text-align:center;color:#fff;font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin-top:22px;">Sign in</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+              <div style="flex:1;height:1px;background:#33474F;"></div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#7F929A;">or</div>
+              <div style="flex:1;height:1px;background:#33474F;"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px;">
+              <div style="background:#fff;border-radius:12px;padding:13px;display:flex;align-items:center;justify-content:center;gap:9px;">
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:14px;color:#4285F4;">G</div>
+                <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;">Continue with Google</div>
+              </div>
+              <div style="background:#fff;border-radius:12px;padding:13px;display:flex;align-items:center;justify-content:center;gap:9px;">
+                <svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;"><path d="M11.72 8.98c.01-1.58.83-2.99 2.13-3.79-.7-1-1.83-1.62-3.05-1.66-1.28-.13-2.52.75-3.17.75-.66 0-1.65-.73-2.72-.71-1.4.02-2.68.78-3.38 2-1.44 2.5-.37 6.2 1.03 8.23.68 1 1.49 2.1 2.55 2.06 1.02-.04 1.41-.66 2.65-.66 1.23 0 1.58.66 2.66.64 1.1-.02 1.79-1 2.47-2 .5-.71.88-1.5 1.13-2.33-1.35-.57-2.29-1.9-2.3-3.37zM9.5 2.4c.6-.72.9-1.65.82-2.6-.93.1-1.79.55-2.4 1.25-.6.68-.9 1.58-.83 2.5.94.02 1.83-.4 2.41-1.15z" fill="#17262D"/></svg>
+                <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;">Continue with Apple</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:0 26px 30px 26px;position:relative;z-index:1;">
+            <div style="display:flex;align-items:center;gap:8px;background:#22333F;border-radius:10px;padding:11px 13px;">
+              <div style="width:7px;height:7px;border-radius:50%;background:#2CA5C0;flex:0 0 auto;"></div>
+              <div style="font-size:11px;color:#9FB2B8;line-height:1.35;">Signed-in sessions work offline for 30 days on site.</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">1 · Login</div>
+      </div>
+
+      <!-- 2 · DASHBOARD -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Dashboard" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 22px 22px 22px;flex:0 0 auto;position:relative;overflow:hidden;">
+            <img src="assets/id-mark.png" alt="" style="position:absolute;top:23px;left:196px;width:120px;height:120px;object-fit:contain;opacity:0.1;pointer-events:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;position:relative;z-index:1;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="display:flex;gap:8px;align-items:center;"><span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2A3B43;"></span></span>
+            </div>
+            <div style="position:relative;z-index:1;display:flex;align-items:baseline;font-family:'Archivo',sans-serif;font-weight:800;font-size:34px;letter-spacing:-0.02em;line-height:1;margin-top:12px;">
+              <span style="color:#E4772A;">Event</span><span style="color:#fff;">Insight</span>
+            </div>
+            <div style="position:relative;z-index:1;font-family:'IBM Plex Mono',monospace;font-size:8.5px;text-transform:uppercase;color:#7FC4D6;line-height:1;margin-top:9px;padding-left:2.5px;">By Investigations Differently</div>
+          </div>
+          <div style="flex:1;min-height:0;padding:20px 16px 16px 16px;display:flex;flex-direction:column;">
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <div style="flex:1;background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:12px;">
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#2CA5C0;">48</div>
+                <div style="font-size:11px;color:#5D6B70;margin-top:2px;">Completed events</div>
+              </div>
+              <div style="flex:1;background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:12px;">
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#E4772A;">7</div>
+                <div style="font-size:11px;color:#5D6B70;margin-top:2px;">Events needing review</div>
+              </div>
+            </div>
+            <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;color:#17262D;">Recent events</div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:14px;margin-bottom:10px;border-left:4px solid #E4772A;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2041</div>
+                <div style="font-size:10px;font-weight:700;color:#E4772A;background:rgba(228,119,42,0.12);padding:2px 8px;border-radius:20px;">NEEDS REVIEW</div>
+              </div>
+              <div style="font-weight:600;font-size:14px;margin:6px 0 4px 0;color:#17262D;">Near-miss · loading dock</div>
+              <div style="font-size:12px;color:#5D6B70;">Investigation in progress · assigned to K. Rao</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:14px;margin-bottom:10px;border-left:4px solid #2CA5C0;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2038</div>
+                <div style="font-size:10px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:2px 8px;border-radius:20px;">COMPLETED</div>
+              </div>
+              <div style="font-weight:600;font-size:14px;margin:6px 0 4px 0;color:#17262D;">Equipment failure · Line 3</div>
+              <div style="font-size:12px;color:#5D6B70;">Root cause closed out · signed off by M. Ellis</div>
+            </div>
+            <div style="background:#E4772A;border-radius:12px;padding:14px;text-align:center;color:#fff;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;margin-top:auto;">Log new event</div>
+          </div>
+          <div style="display:flex;justify-content:space-around;padding:12px 0 16px 0;background:#fff;border-top:1px solid #E5E3DC;flex:0 0 auto;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#E4772A;"></div><div style="font-size:9.5px;font-weight:600;color:#E4772A;">Dashboard</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Events</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Insights</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Account</div></div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">2 · Dashboard</div>
+      </div>
+
+      <!-- 3 · EVENTS -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Events" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 18px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="display:flex;gap:8px;align-items:center;"><span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2A3B43;"></span></span>
+            </div>
+            <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;color:#fff;letter-spacing:-0.02em;margin-top:6px;">Events</div>
+            <div style="display:flex;align-items:center;gap:8px;background:#22333F;border-radius:11px;padding:10px 12px;margin-top:14px;">
+              <div style="width:11px;height:11px;border:1.5px solid #7F929A;border-radius:50%;flex:0 0 auto;"></div>
+              <div style="font-size:13px;color:#7F929A;">Search events, sites, IDs</div>
+            </div>
+          </div>
+          <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+            <div style="display:flex;gap:7px;padding:14px 16px 12px 16px;">
+              <div style="font-size:11px;font-weight:700;color:#fff;background:#1B2B3A;padding:6px 11px;border-radius:20px;">All 55</div>
+              <div style="font-size:11px;font-weight:700;color:#E4772A;background:rgba(228,119,42,0.12);padding:6px 11px;border-radius:20px;">Review 7</div>
+              <div style="font-size:11px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:6px 11px;border-radius:20px;">Done 48</div>
+            </div>
+            <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">Today</div>
+              <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;border-left:4px solid #E4772A;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2041</div>
+                  <div style="font-size:10px;font-weight:700;color:#E4772A;background:rgba(228,119,42,0.12);padding:2px 8px;border-radius:20px;">NEEDS REVIEW</div>
+                </div>
+                <div style="font-weight:600;font-size:14px;margin:6px 0 4px 0;color:#17262D;">Near-miss · loading dock</div>
+                <div style="font-size:12px;color:#5D6B70;">Northgate Depot · 3 interviews recorded</div>
+              </div>
+              <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;border-left:4px solid #8A9499;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2040</div>
+                  <div style="font-size:10px;font-weight:700;color:#5D6B70;background:#EFEDE7;padding:2px 8px;border-radius:20px;">DRAFT · OFFLINE</div>
+                </div>
+                <div style="font-weight:600;font-size:14px;margin:6px 0 4px 0;color:#17262D;">Spill · chemical store</div>
+                <div style="font-size:12px;color:#5D6B70;">Waiting to sync · interview not started</div>
+              </div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;margin-top:4px;">Earlier this week</div>
+              <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;border-left:4px solid #2CA5C0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2038</div>
+                  <div style="font-size:10px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:2px 8px;border-radius:20px;">COMPLETED</div>
+                </div>
+                <div style="font-weight:600;font-size:14px;margin:6px 0 4px 0;color:#17262D;">Equipment failure · Line 3</div>
+                <div style="font-size:12px;color:#5D6B70;">Insight ready · signed off by M. Ellis</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;padding:12px 0 16px 0;background:#fff;border-top:1px solid #E5E3DC;flex:0 0 auto;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Dashboard</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#E4772A;"></div><div style="font-size:9.5px;font-weight:600;color:#E4772A;">Events</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Insights</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Account</div></div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">3 · Events</div>
+      </div>
+
+
+      <!-- 4 · LOG NEW EVENT -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Log new event" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 16px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-size:20px;color:#C6D4D9;line-height:1;">‹</div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:-0.02em;">Log new event</div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:18px 18px 0 18px;display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;gap:10px;flex:0 0 auto;">
+              <div style="flex:1;">
+                <div style="font-size:11px;font-weight:700;color:#5D6B70;margin-bottom:6px;">Date</div>
+                <div style="background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:12px;font-size:13.5px;color:#17262D;">24 Jul 2026</div>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:11px;font-weight:700;color:#5D6B70;margin-bottom:6px;">Time</div>
+                <div style="background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:12px;font-size:13.5px;color:#17262D;">2:15 PM</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#5D6B70;margin-bottom:6px;">Site</div>
+              <div style="background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:12px;font-size:13.5px;color:#17262D;display:flex;justify-content:space-between;align-items:center;">
+                <span>Northgate Depot</span><span style="color:#8A9499;font-size:11px;">▾</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#5D6B70;margin-bottom:6px;">Event name</div>
+              <div style="background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:12px;font-size:13.5px;color:#17262D;">Near-miss · loading dock</div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#5D6B70;margin-bottom:6px;">Description</div>
+              <div style="background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:12px;font-size:13px;color:#3A474D;line-height:1.45;height:56px;overflow:hidden;">Forklift reversed as a pedestrian crossed the marked walkway. No contact, no injury.</div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#5D6B70;margin-bottom:6px;">Interviewees</div>
+              <div style="display:flex;gap:8px;">
+                <div style="flex:1;background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                  <div style="width:26px;height:26px;border-radius:50%;background:#E7EEF0;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:10px;color:#2CA5C0;">KR</div>
+                  <div style="font-size:11.5px;font-weight:600;color:#17262D;">K. Rao</div>
+                </div>
+                <div style="flex:1;background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                  <div style="width:26px;height:26px;border-radius:50%;background:#E7EEF0;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:10px;color:#2CA5C0;">DT</div>
+                  <div style="font-size:11.5px;font-weight:600;color:#17262D;">D. Toma</div>
+                </div>
+                <div style="flex:1;border:1.5px dashed #C7C3B9;border-radius:11px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                  <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#8A9499;line-height:1;">+</div>
+                  <div style="font-size:11.5px;font-weight:600;color:#5D6B70;">Add</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#5D6B70;margin-bottom:6px;">Photos</div>
+              <div style="display:flex;gap:8px;">
+                <div style="width:54px;height:54px;border-radius:11px;background:#DFDCD4;border:1px solid #E5E3DC;"></div>
+                <div style="width:54px;height:54px;border-radius:11px;background:#DFDCD4;border:1px solid #E5E3DC;"></div>
+                <div style="width:54px;height:54px;border-radius:11px;border:1.5px dashed #C7C3B9;display:flex;align-items:center;justify-content:center;font-size:20px;color:#8A9499;">+</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 18px 22px 18px;background:#F6F5F1;flex:0 0 auto;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#2CA5C0;"></div>
+              <div style="font-size:11px;color:#5D6B70;">Saved on device — will sync when back online</div>
+            </div>
+            <div style="background:#E4772A;border-radius:12px;padding:15px;text-align:center;color:#fff;font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Save &amp; start interview</div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">4 · Log new event</div>
+      </div>
+
+      <!-- 5 · SELECT INTERVIEWEE -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Select interviewee" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 16px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-size:20px;color:#C6D4D9;line-height:1;">‹</div>
+              <div>
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:-0.02em;">Who are you interviewing?</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#7FC4D6;margin-top:4px;">EVT-2041 · NEAR-MISS · LOADING DOCK</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:18px 16px 0 16px;display:flex;flex-direction:column;gap:10px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;flex:0 0 auto;">Interviewees on this event</div>
+            <div style="background:#fff;border:1.5px solid #E4772A;border-radius:12px;padding:13px;display:flex;align-items:center;gap:12px;flex:0 0 auto;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#E7EEF0;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:12px;color:#2CA5C0;flex:0 0 auto;">KR</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:14px;color:#17262D;">K. Rao</div>
+                <div style="font-size:11.5px;color:#5D6B70;margin-top:2px;">Witness · pedestrian on walkway</div>
+              </div>
+              <div style="width:20px;height:20px;border-radius:50%;background:#E4772A;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex:0 0 auto;">✓</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;display:flex;align-items:center;gap:12px;flex:0 0 auto;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#E7EEF0;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:12px;color:#2CA5C0;flex:0 0 auto;">DT</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:14px;color:#17262D;">D. Toma</div>
+                <div style="font-size:11.5px;color:#5D6B70;margin-top:2px;">Forklift operator</div>
+              </div>
+              <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #D8DDDE;flex:0 0 auto;"></div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;display:flex;align-items:center;gap:12px;flex:0 0 auto;opacity:0.7;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#EFEDE7;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:12px;color:#8A9499;flex:0 0 auto;">ME</div>
+              <div style="flex:1;">
+                <div style="font-weight:600;font-size:14px;color:#17262D;">M. Ellis</div>
+                <div style="font-size:11.5px;color:#5D6B70;margin-top:2px;">Supervisor</div>
+              </div>
+              <div style="font-size:9.5px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:3px 8px;border-radius:20px;flex:0 0 auto;">DONE 12:04</div>
+            </div>
+            <div style="border:1.5px dashed #C7C3B9;border-radius:12px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;">
+              <div style="font-size:15px;color:#8A9499;line-height:1;">+</div>
+              <div style="font-size:13px;font-weight:600;color:#5D6B70;">Add someone else</div>
+            </div>
+            <div style="flex:0 0 auto;margin-top:4px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;margin-bottom:8px;">Question set</div>
+              <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;overflow:hidden;">
+                <div style="padding:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #EFEDE7;">
+                  <div>
+                    <div style="font-weight:600;font-size:13.5px;color:#17262D;">Near-miss · standard</div>
+                    <div style="font-size:11.5px;color:#5D6B70;margin-top:2px;">8 questions</div>
+                  </div>
+                  <div style="color:#C7C3B9;font-size:15px;">›</div>
+                </div>
+                <div style="display:flex;gap:9px;padding:9px 13px;border-bottom:1px solid #EFEDE7;align-items:baseline;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#2CA5C0;flex:0 0 auto;">01</div>
+                  <div style="font-size:12px;color:#3A474D;line-height:1.35;">Where were you when it happened?</div>
+                </div>
+                <div style="display:flex;gap:9px;padding:9px 13px;border-bottom:1px solid #EFEDE7;align-items:baseline;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#2CA5C0;flex:0 0 auto;">02</div>
+                  <div style="font-size:12px;color:#3A474D;line-height:1.35;">What did you see first?</div>
+                </div>
+                <div style="display:flex;gap:9px;padding:9px 13px;align-items:baseline;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;flex:0 0 auto;">···</div>
+                  <div style="font-size:12px;color:#8A9499;line-height:1.35;">6 more questions</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 18px 22px 18px;flex:0 0 auto;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#2CA5C0;"></div>
+              <div style="font-size:11px;color:#5D6B70;">Consent is captured before recording starts</div>
+            </div>
+            <div style="background:#E4772A;border-radius:12px;padding:15px;text-align:center;color:#fff;font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Start interview with K. Rao</div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">5 · Select interviewee</div>
+      </div>
+
+      <!-- 6 · INTERVIEW RECORDING -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Recorded interview" style="width:336px;height:720px;background:#17262D;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="padding:0 20px 8px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#7FC4D6;">EVT-2041 · Interview 1 of 3</div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:7px;height:7px;border-radius:50%;background:#E4772A;"></div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#E4772A;">REC 04:12</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;padding:22px 22px 0 22px;display:flex;flex-direction:column;">
+            <div style="display:flex;gap:4px;margin-bottom:22px;">
+              <div style="flex:1;height:3px;border-radius:2px;background:#E4772A;"></div>
+              <div style="flex:1;height:3px;border-radius:2px;background:#E4772A;"></div>
+              <div style="flex:1;height:3px;border-radius:2px;background:#E4772A;"></div>
+              <div style="flex:1;height:3px;border-radius:2px;background:#33474F;"></div>
+              <div style="flex:1;height:3px;border-radius:2px;background:#33474F;"></div>
+              <div style="flex:1;height:3px;border-radius:2px;background:#33474F;"></div>
+              <div style="flex:1;height:3px;border-radius:2px;background:#33474F;"></div>
+              <div style="flex:1;height:3px;border-radius:2px;background:#33474F;"></div>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">Question 3 of 8</div>
+            <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:25px;line-height:1.25;color:#fff;letter-spacing:-0.02em;margin-top:12px;text-wrap:pretty;">Walk me through what you saw in the moments before it happened.</div>
+            <div style="margin-top:26px;background:#1F323B;border-radius:14px;padding:14px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#7FC4D6;margin-bottom:8px;">Live transcript</div>
+              <div style="font-size:13px;line-height:1.5;color:#C6D4D9;">"I was walking the marked path toward the store when I heard the reverse alarm start up behind the pallets…"</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:3px;height:52px;margin-top:auto;margin-bottom:20px;">
+              <div style="flex:1;height:38%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:62%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:88%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:54%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:74%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:34%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:58%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:96%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:44%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:66%;background:#E4772A;border-radius:2px;"></div>
+              <div style="flex:1;height:30%;background:#33474F;border-radius:2px;"></div>
+              <div style="flex:1;height:48%;background:#33474F;border-radius:2px;"></div>
+              <div style="flex:1;height:26%;background:#33474F;border-radius:2px;"></div>
+            </div>
+          </div>
+          <div style="padding:0 22px 28px 22px;display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;">
+            <div style="font-size:13px;font-weight:600;color:#8A9499;width:64px;">Back</div>
+            <div style="width:66px;height:66px;border-radius:50%;border:3px solid rgba(228,119,42,0.35);display:flex;align-items:center;justify-content:center;">
+              <div style="width:24px;height:24px;border-radius:5px;background:#E4772A;"></div>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:#E4772A;width:64px;text-align:right;">Next</div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">6 · Recorded interview</div>
+      </div>
+
+      <!-- 7 · TRANSCRIPT APPROVAL -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Approve transcript" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 16px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-size:20px;color:#C6D4D9;line-height:1;">‹</div>
+              <div>
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:20px;color:#fff;letter-spacing:-0.02em;">Approve transcript</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#7FC4D6;margin-top:3px;">EVT-2041 · INTERVIEW 1 · 12:04</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:16px 18px 0 18px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:7px;background:rgba(44,165,192,0.12);border-radius:10px;padding:10px 12px;flex:0 0 auto;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#2CA5C0;flex:0 0 auto;"></div>
+              <div style="font-size:11.5px;color:#17262D;line-height:1.35;">Tap any line to correct it. Approving unlocks AI analysis.</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                <div style="font-size:11px;font-weight:700;color:#2CA5C0;">Investigator</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A9499;">00:42</div>
+              </div>
+              <div style="font-size:13px;line-height:1.5;color:#3A474D;">Walk me through what you saw in the moments before it happened.</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                <div style="font-size:11px;font-weight:700;color:#17262D;">K. Rao · witness</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A9499;">00:51</div>
+              </div>
+              <div style="font-size:13px;line-height:1.5;color:#3A474D;">I was walking the marked path toward the store when I heard the reverse alarm start up behind the pallets. The stack was <span style="background:rgba(228,119,42,0.16);padding:0 3px;border-radius:3px;">about head height</span> so I couldn't see the cab.</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                <div style="font-size:11px;font-weight:700;color:#2CA5C0;">Investigator</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A9499;">01:18</div>
+              </div>
+              <div style="font-size:13px;line-height:1.5;color:#3A474D;">Had the walkway been blocked like that before?</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                <div style="font-size:11px;font-weight:700;color:#17262D;">K. Rao · witness</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#8A9499;">01:26</div>
+              </div>
+              <div style="font-size:13px;line-height:1.5;color:#3A474D;">Most changeovers, yeah. The empties get staged there because the bay is full.</div>
+            </div>
+            <div style="text-align:center;font-size:12px;font-weight:600;color:#8A9499;padding:4px 0;">14 more lines</div>
+          </div>
+          <div style="padding:12px 18px 22px 18px;display:flex;gap:10px;flex:0 0 auto;">
+            <div style="flex:1;border:1.5px solid #C7C3B9;border-radius:12px;padding:14px;text-align:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#5D6B70;">Edit</div>
+            <div style="flex:1.4;background:#E4772A;border-radius:12px;padding:14px;text-align:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#fff;">Approve</div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">7 · Approve transcript</div>
+      </div>
+
+      <!-- 8 · INSIGHTS LIST -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Insights" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 18px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="display:flex;gap:8px;align-items:center;"><span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span><span style="width:22px;height:22px;border-radius:50%;background:#2A3B43;"></span></span>
+            </div>
+            <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;color:#fff;letter-spacing:-0.02em;margin-top:6px;">Insights</div>
+            <div style="font-size:12px;color:#9FB2B8;margin-top:5px;">AI analysis for each completed event</div>
+          </div>
+          <div style="flex:1;padding:16px 16px 0 16px;display:flex;flex-direction:column;gap:10px;">
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2038</div>
+                <div style="font-size:9.5px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:2px 7px;border-radius:20px;letter-spacing:0.06em;">AI INSIGHT</div>
+              </div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:7px 0 5px 0;color:#17262D;line-height:1.25;">Guard interlock bypassed to keep the line running</div>
+              <div style="font-size:12px;color:#5D6B70;line-height:1.45;">Three interviews point to schedule pressure at shift change rather than operator error.</div>
+              <div style="display:flex;gap:6px;margin-top:10px;">
+                <div style="font-size:10px;font-weight:700;color:#E4772A;background:rgba(228,119,42,0.12);padding:3px 8px;border-radius:20px;">3 ACTIONS</div>
+                <div style="font-size:10px;font-weight:600;color:#5D6B70;background:#EFEDE7;padding:3px 8px;border-radius:20px;">Line 3</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2035</div>
+                <div style="font-size:9.5px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:2px 7px;border-radius:20px;letter-spacing:0.06em;">AI INSIGHT</div>
+              </div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:7px 0 5px 0;color:#17262D;line-height:1.25;">Manual handling load exceeds the documented limit</div>
+              <div style="font-size:12px;color:#5D6B70;line-height:1.45;">Same 25 kg carton appears in two earlier events at this site.</div>
+              <div style="display:flex;gap:6px;margin-top:10px;">
+                <div style="font-size:10px;font-weight:700;color:#E4772A;background:rgba(228,119,42,0.12);padding:3px 8px;border-radius:20px;">REPEAT CAUSE</div>
+                <div style="font-size:10px;font-weight:600;color:#5D6B70;background:#EFEDE7;padding:3px 8px;border-radius:20px;">Northgate</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:14px;opacity:0.72;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2041</div>
+                <div style="font-size:9.5px;font-weight:700;color:#8A9499;background:#EFEDE7;padding:2px 7px;border-radius:20px;letter-spacing:0.06em;">ANALYSING</div>
+              </div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:7px 0 5px 0;color:#17262D;line-height:1.25;">Near-miss · loading dock</div>
+              <div style="font-size:12px;color:#5D6B70;line-height:1.45;">Transcript approved — insight ready in a few minutes.</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;padding:12px 0 16px 0;background:#fff;border-top:1px solid #E5E3DC;flex:0 0 auto;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Dashboard</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Events</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#E4772A;"></div><div style="font-size:9.5px;font-weight:600;color:#E4772A;">Insights</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Account</div></div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">8 · Insights list</div>
+      </div>
+
+      <!-- 9 · INSIGHT DETAIL SHEET -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Insight detail" style="width:336px;height:720px;background:#0F1E24;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#F6F5F1;border-radius:26px 26px 34px 34px;padding:0 0 22px 0;display:flex;flex-direction:column;height:660px;">
+            <div style="display:flex;justify-content:center;padding:10px 0 0 0;"><div style="width:38px;height:4px;border-radius:3px;background:#C7C3B9;"></div></div>
+            <div style="padding:14px 20px 14px 20px;border-bottom:1px solid #E5E3DC;">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A9499;">EVT-2038 · LINE 3</div>
+                <div style="font-size:9.5px;font-weight:700;color:#2CA5C0;background:rgba(44,165,192,0.14);padding:2px 7px;border-radius:20px;letter-spacing:0.06em;">AI INSIGHT</div>
+              </div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;color:#17262D;line-height:1.2;letter-spacing:-0.02em;margin-top:8px;text-wrap:pretty;">Guard interlock bypassed to keep the line running</div>
+            </div>
+            <div style="flex:1;padding:16px 20px 0 20px;display:flex;flex-direction:column;gap:16px;">
+              <div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#2CA5C0;margin-bottom:8px;">Key finding</div>
+                <div style="font-size:13px;line-height:1.5;color:#3A474D;">All three interviews describe the interlock being held closed during changeover. No one identified it as a workaround — it was described as "how we do it at shift change".</div>
+              </div>
+              <div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#2CA5C0;margin-bottom:8px;">Contributing factors</div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;gap:9px;"><div style="width:5px;height:5px;border-radius:50%;background:#E4772A;margin-top:6px;flex:0 0 auto;"></div><div style="font-size:13px;line-height:1.45;color:#3A474D;">Changeover target unchanged since the guard was fitted</div></div>
+                  <div style="display:flex;gap:9px;"><div style="width:5px;height:5px;border-radius:50%;background:#E4772A;margin-top:6px;flex:0 0 auto;"></div><div style="font-size:13px;line-height:1.45;color:#3A474D;">Induction covers the guard, not the changeover exception</div></div>
+                  <div style="display:flex;gap:9px;"><div style="width:5px;height:5px;border-radius:50%;background:#E4772A;margin-top:6px;flex:0 0 auto;"></div><div style="font-size:13px;line-height:1.45;color:#3A474D;">Supervisor sightline blocked by the new pallet stack</div></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#2CA5C0;margin-bottom:8px;">Recommended actions</div>
+                <div style="background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:11px 12px;font-size:12.5px;color:#17262D;line-height:1.4;margin-bottom:7px;">Re-time changeover with the guard in place</div>
+                <div style="background:#fff;border:1px solid #E5E3DC;border-radius:11px;padding:11px 12px;font-size:12.5px;color:#17262D;line-height:1.4;">Add the exception to the Line 3 induction</div>
+              </div>
+            </div>
+            <div style="padding:14px 20px 0 20px;display:flex;gap:10px;">
+              <div style="flex:1;border:1.5px solid #C7C3B9;border-radius:12px;padding:14px;text-align:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#5D6B70;">Close</div>
+              <div style="flex:1.4;background:#E4772A;border-radius:12px;padding:14px;text-align:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#fff;">Share PDF</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">9 · Insight detail · share PDF</div>
+      </div>
+
+      <!-- 10 · ACCOUNT -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Account" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 20px 20px;flex:0 0 auto;position:relative;overflow:hidden;">
+            <img src="assets/id-mark.png" alt="" style="position:absolute;top:20px;left:230px;width:130px;height:130px;object-fit:contain;opacity:0.1;pointer-events:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;position:relative;z-index:1;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px;margin-top:8px;position:relative;z-index:1;">
+              <div style="width:52px;height:52px;border-radius:50%;background:#2A3B43;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:#7FC4D6;">JM</div>
+              <div>
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;color:#fff;letter-spacing:-0.02em;">Jordan Mercer</div>
+                <div style="font-size:12px;color:#9FB2B8;margin-top:2px;">Supervisor · Investigator</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;padding:18px 16px 0 16px;display:flex;flex-direction:column;gap:12px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">Account information</div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;overflow:hidden;">
+              <div style="padding:13px;border-bottom:1px solid #EFEDE7;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div style="font-size:12px;color:#5D6B70;">Name</div><div style="font-weight:600;font-size:13px;color:#17262D;">Jordan Mercer</div>
+              </div>
+              <div style="padding:13px;border-bottom:1px solid #EFEDE7;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div style="font-size:12px;color:#5D6B70;">Email</div><div style="font-weight:600;font-size:13px;color:#17262D;">j.mercer@investigations.au</div>
+              </div>
+              <div style="padding:13px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div style="font-size:12px;color:#5D6B70;">Role</div><div style="font-weight:600;font-size:13px;color:#17262D;">Supervisor · Investigator</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;overflow:hidden;margin-top:4px;">
+              <div style="padding:14px 13px;border-bottom:1px solid #EFEDE7;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-weight:600;font-size:13.5px;color:#17262D;">Help &amp; support</div><div style="color:#C7C3B9;font-size:15px;">›</div>
+              </div>
+              <div style="padding:14px 13px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-weight:600;font-size:13.5px;color:#17262D;">Investigations Differently</div>
+                  <div style="font-size:11.5px;color:#5D6B70;margin-top:2px;">investigationsdifferently.com.au</div>
+                </div>
+                <div style="color:#2CA5C0;font-size:14px;font-weight:700;">↗</div>
+              </div>
+            </div>
+            <div style="border:1.5px solid #E5D2C2;border-radius:12px;padding:14px;text-align:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#E4772A;margin-top:4px;">Sign out</div>
+            <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#A8AFB2;margin-top:auto;margin-bottom:14px;">EventInsight v1.0</div>
+          </div>
+          <div style="display:flex;justify-content:space-around;padding:12px 0 16px 0;background:#fff;border-top:1px solid #E5E3DC;flex:0 0 auto;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Dashboard</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Events</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#D8DDDE;"></div><div style="font-size:9.5px;font-weight:600;color:#8A9499;">Insights</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;"><div style="width:22px;height:22px;border-radius:6px;background:#E4772A;"></div><div style="font-size:9.5px;font-weight:600;color:#E4772A;">Account</div></div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">10 · Account</div>
+      </div>
+
+      <!-- 11 · HELP & SUPPORT -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Help and support" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 16px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-size:20px;color:#C6D4D9;line-height:1;">‹</div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:-0.02em;">Help &amp; support</div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:18px 16px 0 16px;display:flex;flex-direction:column;gap:10px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;flex:0 0 auto;">Common questions</div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;flex:0 0 auto;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                <div style="font-weight:600;font-size:13px;color:#17262D;line-height:1.35;">Can I record an interview with no signal?</div>
+                <div style="color:#8A9499;font-size:13px;line-height:1.35;">–</div>
+              </div>
+              <div style="font-size:12.5px;line-height:1.5;color:#5D6B70;margin-top:7px;">Yes. Events and recordings are saved on the device and upload automatically once you're back online. [Template copy]</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:0 0 auto;">
+              <div style="font-weight:600;font-size:13px;color:#17262D;line-height:1.35;">How do I correct a transcript?</div><div style="color:#C7C3B9;font-size:15px;">+</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:0 0 auto;">
+              <div style="font-weight:600;font-size:13px;color:#17262D;line-height:1.35;">Who can see an event's insight?</div><div style="color:#C7C3B9;font-size:15px;">+</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;padding:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:0 0 auto;">
+              <div style="font-weight:600;font-size:13px;color:#17262D;line-height:1.35;">How long are recordings kept?</div><div style="color:#C7C3B9;font-size:15px;">+</div>
+            </div>
+            <div style="background:#22333F;border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:0 0 auto;margin-top:4px;">
+              <div>
+                <div style="font-weight:600;font-size:13px;color:#fff;">Still need a hand?</div>
+                <div style="font-size:11.5px;color:#9FB2B8;margin-top:2px;">support@investigationsdifferently.com.au</div>
+              </div>
+              <div style="color:#E4772A;font-size:14px;font-weight:700;">↗</div>
+            </div>
+            <div style="background:#fff;border:1px solid #E5E3DC;border-radius:12px;overflow:hidden;flex:0 0 auto;margin-top:auto;margin-bottom:16px;">
+              <div style="padding:13px;border-bottom:1px solid #EFEDE7;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-weight:600;font-size:13px;color:#17262D;">Terms of use</div><div style="color:#C7C3B9;font-size:15px;">›</div>
+              </div>
+              <div style="padding:13px;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-weight:600;font-size:13px;color:#17262D;">Privacy policy</div><div style="color:#C7C3B9;font-size:15px;">›</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">11 · Help &amp; support</div>
+      </div>
+
+      <!-- 12 · TERMS OF USE -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Terms of use" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 16px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-size:20px;color:#C6D4D9;line-height:1;">‹</div>
+              <div>
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:-0.02em;">Terms of use</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#7FC4D6;margin-top:3px;">TEMPLATE · LAST UPDATED JUL 2026</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:18px 20px 0 20px;display:flex;flex-direction:column;gap:16px;">
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">1 · Using EventInsight</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Describe who may use the app, the licence granted to the organisation, and acceptable use on site. [Client legal copy to be supplied]</div>
+            </div>
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">2 · Recordings &amp; consent</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Set out the investigator's obligation to obtain consent before recording an interview and how participants may withdraw.</div>
+            </div>
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">3 · AI-generated insight</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Note that insights are decision support only and must be reviewed by a qualified investigator before action.</div>
+            </div>
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">4 · Data &amp; retention</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Where recordings and transcripts are stored, for how long, and who controls deletion.</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">12 · Terms of use</div>
+      </div>
+
+      <!-- 13 · PRIVACY POLICY -->
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div data-screen-label="Privacy policy" style="width:336px;height:720px;background:#F6F5F1;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 44px rgba(23,38,45,0.18);">
+          <div style="background:#1B2B3A;padding:0 20px 16px 20px;flex:0 0 auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;height:44px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C6D4D9;">
+              <span style="font-weight:500;">9:41</span>
+              <span style="width:16px;height:9px;border:1.5px solid #C6D4D9;border-radius:2px;"></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-size:20px;color:#C6D4D9;line-height:1;">‹</div>
+              <div>
+                <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:-0.02em;">Privacy policy</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#7FC4D6;margin-top:3px;">TEMPLATE · LAST UPDATED JUL 2026</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:18px 20px 0 20px;display:flex;flex-direction:column;gap:16px;">
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">1 · What we collect</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Event details, photos, interview recordings and transcripts, and the account information of the investigator who logged them. [Client legal copy to be supplied]</div>
+            </div>
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">2 · How recordings are used</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Recordings are transcribed and analysed to produce the event insight, and are not used to train third-party models.</div>
+            </div>
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">3 · Who can access it</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Access is limited to the organisation's investigators and nominated WHS staff.</div>
+            </div>
+            <div style="flex:0 0 auto;">
+              <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:#17262D;margin-bottom:6px;">4 · Storage, retention &amp; your rights</div>
+              <div style="font-size:12.5px;line-height:1.55;color:#5D6B70;">Placeholder clause. Where data is hosted, how long it is kept, and how a participant may request a copy or deletion.</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A9499;">13 · Privacy policy</div>
+      </div>
+
+    
+  </div>
+</body>
+</html>
