@@ -332,15 +332,19 @@ async function runInsights(
         console.error('post-report audio purge failed', event_id, String(purgeErr));
       }
     } catch (e) {
-      // Give the free credit back if this very run claimed it — the report
-      // never materialised, so nothing was spent. Matching on our exact stamp
-      // means a concurrent successful run's stamp is never clobbered.
+      // Give the free credit back if this very run claimed it and the owner
+      // has NO persisted report (a concurrent subscriber run may have
+      // succeeded under our stamp — release_free_credit (0032) checks both
+      // conditions in one atomic statement, so the stamp is never cleared
+      // while a report exists).
       if (creditClaimed && creditStamp) {
-        await db
-          .from('profiles')
-          .update({ free_report_used_at: null })
-          .eq('id', ev.owner_id)
-          .eq('free_report_used_at', creditStamp);
+        const { error: relErr } = await db.rpc('release_free_credit', {
+          p_user: ev.owner_id,
+          p_stamp: creditStamp,
+        });
+        if (relErr) {
+          console.error('free-credit release failed', ev.owner_id, relErr.message);
+        }
       }
       if (jobId) {
         await db

@@ -9,6 +9,25 @@
 --    the function's check-then-insert had a window where two concurrent
 --    requests both started, interleaving deletes and inserts of the same rows.
 
+-- The pre-index schema allowed duplicate active jobs (the very race this
+-- migration closes), so resolve any survivors first or the index creation
+-- itself would abort the deploy: keep the newest active job per event, mark
+-- the rest superseded. (Applied environments already passed this cleanly —
+-- this guard is for fresh applies of the whole chain.)
+update ai_jobs a
+   set status = 'error',
+       error  = 'superseded: duplicate active job resolved by migration 0031'
+ where a.type = 'insights'
+   and a.status in ('queued', 'processing')
+   and exists (
+     select 1 from ai_jobs b
+      where b.event_id = a.event_id
+        and b.type = 'insights'
+        and b.status in ('queued', 'processing')
+        and (b.created_at > a.created_at
+             or (b.created_at = a.created_at and b.id > a.id))
+   );
+
 create unique index if not exists ai_jobs_one_active_insights
   on ai_jobs (event_id)
   where type = 'insights' and status in ('queued', 'processing');
