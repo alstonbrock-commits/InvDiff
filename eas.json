@@ -43,6 +43,12 @@
         "serviceAccountKeyPath": "./google-play-service-account.json",
         "track": "internal"
       }
+    },
+    "closed": {
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "alpha"
+      }
     }
   }
 }
