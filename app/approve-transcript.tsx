@@ -1,5 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, ScrollView, Text, Pressable, TextInput } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  Easing,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -23,6 +32,71 @@ import {
 } from '@/lib/remote';
 import { isOfflineError, startInsightGeneration } from '@/lib/insightFlow';
 import { callFunction } from '@/lib/supabase';
+
+// Progress for the transcription wait: solid fill for settled answers, plus a
+// sweeping highlight so the screen visibly breathes while the server works —
+// a static "transcribing…" line reads as frozen after twenty seconds.
+function WorkingBar({ fraction }: { fraction: number }) {
+  const [trackWidth, setTrackWidth] = useState(0);
+  const sweep = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(sweep, {
+        toValue: 1,
+        duration: 1600,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+      }),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [sweep]);
+
+  const sweepWidth = Math.max(trackWidth * 0.28, 40);
+  const translateX = sweep.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-sweepWidth, Math.max(trackWidth, 1)],
+  });
+
+  return (
+    <View
+      onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
+      style={{
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: '#E5E3DC',
+        overflow: 'hidden',
+        marginBottom: 8,
+      }}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: `${Math.min(Math.max(fraction, 0), 1) * 100}%`,
+          backgroundColor: '#2CA5C0',
+          borderRadius: 2,
+        }}
+      />
+      {trackWidth > 0 && (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            width: sweepWidth,
+            transform: [{ translateX }],
+            backgroundColor: 'rgba(228,119,42,0.45)',
+            borderRadius: 2,
+          }}
+        />
+      )}
+    </View>
+  );
+}
 
 function TranscriptText({ detail }: { detail: TranscriptDetail }) {
   return (
@@ -481,15 +555,18 @@ export default function ApproveTranscript() {
                 opacity: 0.6,
               }}
             >
-              <Text
-                style={{
-                  fontFamily: 'PublicSans-400',
-                  fontSize: 13,
-                  color: '#8A9499',
-                }}
-              >
-                Waiting for transcription…
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <ActivityIndicator size="small" color="#E4772A" />
+                <Text
+                  style={{
+                    fontFamily: 'PublicSans-400',
+                    fontSize: 13,
+                    color: '#8A9499',
+                  }}
+                >
+                  Transcribing this answer…
+                </Text>
+              </View>
             </View>
           ))}
       </ScrollView>
@@ -498,6 +575,9 @@ export default function ApproveTranscript() {
       <View style={{ paddingHorizontal: 18, paddingTop: 12 }}>
         {/* Status sits with the action, not at the top of a long scroll —
             this is the line that tells you the interview is ready to approve. */}
+        {!offline && !allReady && (
+          <WorkingBar fraction={expected > 0 ? readyCount / expected : 0} />
+        )}
         <View
           style={{
             flexDirection: 'row',
