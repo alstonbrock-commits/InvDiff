@@ -2,7 +2,19 @@
 // idempotent upsert (deletes are soft — payload carries deleted_at), keyed by
 // the client-generated UUID, so retries are safe.
 import { all, getDb } from '../db';
+import { SERVER_COLUMNS } from '../db/schema';
 import { supabase } from '../supabase';
+
+function errorText(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (e && typeof e === 'object' && 'message' in e)
+    return String((e as { message: unknown }).message);
+  try {
+    return JSON.stringify(e);
+  } catch {
+    return String(e);
+  }
+}
 
 const MAX_ATTEMPTS = 8;
 
@@ -38,11 +50,54 @@ export async function drainOutbox(): Promise<{ pushed: number; failed: number }>
       ]);
       pushed++;
     } catch (e) {
+      // Poison tombstone from before localSoftDelete sent full rows: a payload
+      // of only {id, deleted_at, updated_at} can never satisfy the table's NOT
+      // NULL columns (PostgREST upserts are INSERT .. ON CONFLICT, and the
+      // proposed tuple is checked before the conflict clause). Heal it in
+      // place — rebuild the payload from the full local row; if the local row
+      // is gone there is nothing the server could need, so mark it done.
+      // A partial tombstone surfaces as 23502 (NOT NULL) or, when an owner
+      // check reads the missing column first, as 42501 (RLS violation).
+      const code = (e as { code?: string })?.code;
+      const tombstone = item.payload.includes('"deleted_at"');
+      if (
+        (code === '23502' || code === '42501') &&
+        tombstone &&
+        item.table_name in SERVER_COLUMNS
+      ) {
+        const localRow = await db.getFirstAsync<Record<string, unknown>>(
+          `SELECT * FROM ${item.table_name} WHERE id=?`,
+          [item.row_id],
+        );
+        if (localRow) {
+          const old = JSON.parse(item.payload) as Record<string, unknown>;
+          const full: Record<string, unknown> = {};
+          for (const c of SERVER_COLUMNS[
+            item.table_name as keyof typeof SERVER_COLUMNS
+          ]) {
+            if (c in localRow) full[c] = localRow[c];
+          }
+          full.deleted_at =
+            old.deleted_at ?? localRow.deleted_at ?? new Date().toISOString();
+          full.updated_at = old.updated_at ?? localRow.updated_at;
+          await db.runAsync(
+            `UPDATE sync_outbox SET payload=?, attempts=0, last_error='healed partial tombstone' WHERE id=?`,
+            [JSON.stringify(full), item.id],
+          );
+        } else {
+          await db.runAsync(
+            `UPDATE sync_outbox SET status='done', last_error='dropped: tombstone for a row that never reached the server' WHERE id=?`,
+            [item.id],
+          );
+        }
+        continue; // healed or dropped — never let it block the queue
+      }
+
       const attempts = item.attempts + 1;
       const status = attempts >= MAX_ATTEMPTS ? 'failed' : 'pending';
       await db.runAsync(
         `UPDATE sync_outbox SET attempts=?, last_error=?, status=? WHERE id=?`,
-        [attempts, String(e), status, item.id],
+        [attempts, errorText(e), status, item.id],
       );
       failed++;
       // Preserve ordering: stop on first hard failure so we don't push later

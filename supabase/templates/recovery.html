@@ -1,0 +1,31 @@
+<!-- Reset Password email — the app's forgot-password screen asks for this
+     6-digit code. Keep {{ .Token }} present in any redesign; the in-app flow
+     dead-ends without it. Mirror changes in the hosted dashboard:
+     Authentication → Email Templates → Reset Password. -->
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F6F5F1;padding:32px 0;">
+  <tr>
+    <td align="center">
+      <table width="440" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border:1px solid #E5E3DC;border-radius:14px;padding:32px;font-family:Arial,Helvetica,sans-serif;">
+        <tr>
+          <td>
+            <p style="margin:0 0 6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#2CA5C0;font-weight:bold;">
+              Event Insight
+            </p>
+            <h1 style="margin:0 0 14px;font-size:22px;color:#17262D;">Reset your password</h1>
+            <p style="margin:0 0 20px;font-size:14px;line-height:21px;color:#3A474D;">
+              Enter this code in the Event Insight app to set a new password.
+              It expires in one hour. If you didn't ask for it, you can ignore
+              this email — your password is unchanged.
+            </p>
+            <p style="margin:0 0 20px;padding:16px;background:#1B2B3A;border-radius:10px;text-align:center;font-size:28px;letter-spacing:8px;color:#FFFFFF;font-family:'Courier New',monospace;">
+              {{ .Token }}
+            </p>
+            <p style="margin:0;font-size:12px;line-height:18px;color:#8A9499;">
+              Sent by Event Insight · Investigations Differently
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

@@ -3,6 +3,7 @@
 import { all, first, localSoftDelete, localUpsert, nowIso, uuid } from './index';
 import type {
   AnswerRow,
+  EventPhotoRow,
   EventRow,
   IntervieweeRow,
   QuestionRow,
@@ -34,18 +35,29 @@ async function defaultQuestionTexts(): Promise<string[]> {
   return DEFAULT_QUESTIONS;
 }
 
+// Human-facing event ref, derived from the uuid so it's stable offline.
+export function displayRef(eventId: string): string {
+  return `EVT-${eventId.replace(/-/g, '').slice(0, 4).toUpperCase()}`;
+}
+
 // -- Events ------------------------------------------------------------------
 export async function createEvent(
   ownerId: string,
-  title: string,
-  description: string,
+  fields: {
+    title: string;
+    description: string;
+    site: string;
+    occurredAt: string | null; // ISO
+  },
 ): Promise<string> {
   const id = uuid();
   const ts = nowIso();
   await localUpsert('events', {
     id,
-    title,
-    description: description || null,
+    title: fields.title,
+    description: fields.description || null,
+    site: fields.site || null,
+    occurred_at: fields.occurredAt,
     owner_id: ownerId,
     status: 'draft',
     created_at: ts,
@@ -77,6 +89,59 @@ export async function listMyEvents(ownerId: string): Promise<EventRow[]> {
 
 export async function getEvent(id: string): Promise<EventRow | null> {
   return first<EventRow>(`SELECT * FROM events WHERE id=?`, [id]);
+}
+
+// Events with their interviewee count, for list cards.
+export interface EventListItem extends EventRow {
+  interviewee_count: number;
+}
+
+export async function listMyEventsWithCounts(
+  ownerId: string,
+): Promise<EventListItem[]> {
+  return all<EventListItem>(
+    `SELECT e.*,
+       (SELECT COUNT(*) FROM interviewees i
+         WHERE i.event_id=e.id AND i.deleted_at IS NULL) AS interviewee_count
+     FROM events e
+     WHERE e.owner_id=? AND e.deleted_at IS NULL
+     ORDER BY COALESCE(e.occurred_at, e.created_at) DESC`,
+    [ownerId],
+  );
+}
+
+// Dashboard tiles: finalised = "completed", active = "needing review".
+export async function eventStatusCounts(
+  ownerId: string,
+): Promise<{ finalised: number; active: number }> {
+  const rows = await all<{ status: string; c: number }>(
+    `SELECT status, COUNT(*) c FROM events
+     WHERE owner_id=? AND deleted_at IS NULL GROUP BY status`,
+    [ownerId],
+  );
+  const by = Object.fromEntries(rows.map((r) => [r.status, r.c]));
+  return { finalised: by.finalised ?? 0, active: by.active ?? 0 };
+}
+
+// Events with local state the server hasn't seen yet (row pushes pending, or
+// audio still waiting to upload) — drives the DRAFT · OFFLINE treatment.
+export async function unsyncedEventIds(): Promise<Set<string>> {
+  const pendingRows = await all<{ row_id: string }>(
+    `SELECT DISTINCT row_id FROM sync_outbox
+     WHERE table_name='events' AND status='pending'`,
+  );
+  // local_audio_uri now survives upload (it's the 7-day local fallback copy),
+  // so "waiting to upload" must be judged by upload_status, not the pointer.
+  const pendingAudio = await all<{ event_id: string }>(
+    `SELECT DISTINCT i.event_id FROM answers a
+     JOIN interviewees i ON i.id=a.interviewee_id
+     WHERE a.local_audio_uri IS NOT NULL AND a.deleted_at IS NULL
+       AND a.upload_status IN ('pending','failed','uploading')`,
+  );
+  return new Set([
+    ...pendingRows.map((r) => r.row_id),
+    ...pendingAudio.map((r) => r.event_id),
+  ]);
 }
 
 export async function setEventStatus(
@@ -119,6 +184,36 @@ export async function addInterviewee(
   return id;
 }
 
+export async function updateInterviewee(
+  id: string,
+  name: string,
+  roleOrSegment: string,
+): Promise<void> {
+  const row = await first<IntervieweeRow>(
+    `SELECT * FROM interviewees WHERE id=?`,
+    [id],
+  );
+  if (!row) return;
+  await localUpsert('interviewees', {
+    ...row,
+    name,
+    role_or_segment: roleOrSegment || null,
+    updated_at: nowIso(),
+  });
+}
+
+// Take someone off the event. Their answers go with them, so counts, the
+// roster gate and the AI all stop seeing a person who was never interviewed.
+// Soft delete throughout: that is what propagates to other devices.
+export async function removeInterviewee(id: string): Promise<void> {
+  const answers = await all<{ id: string }>(
+    `SELECT id FROM answers WHERE interviewee_id=? AND deleted_at IS NULL`,
+    [id],
+  );
+  for (const a of answers) await localSoftDelete('answers', a.id);
+  await localSoftDelete('interviewees', id);
+}
+
 export async function listInterviewees(
   eventId: string,
 ): Promise<IntervieweeRow[]> {
@@ -135,39 +230,39 @@ export async function getInterviewee(
   return first<IntervieweeRow>(`SELECT * FROM interviewees WHERE id=?`, [id]);
 }
 
-export async function deleteInterviewee(id: string) {
-  await localSoftDelete('interviewees', id);
-}
-
 // -- Consent -----------------------------------------------------------------
-export async function hasConsent(intervieweeId: string): Promise<boolean> {
-  const row = await first(`SELECT id FROM consents WHERE interviewee_id=?`, [
-    intervieweeId,
-  ]);
-  return !!row;
-}
+// The in-app consent signature step was removed: facilitators now go straight
+// from selecting an interviewee into recording, and obtain consent outside the
+// app. The `consents` table and any records captured before this change are
+// retained deliberately — they are legal records of past interviews.
 
-export async function saveConsent(params: {
-  intervieweeId: string;
-  eventId: string;
-  signatureLocalUri: string;
-  consentTextVersion: string;
-  signedByName: string;
-}): Promise<void> {
+// -- Photos ------------------------------------------------------------------
+export async function addPhoto(
+  eventId: string,
+  localUri: string,
+  position: number,
+): Promise<string> {
   const id = uuid();
   const ts = nowIso();
-  // The signature file uploads via the upload flow; storage_path convention is
-  // <event_id>/consent/<interviewee_id>.png
-  const storagePath = `${params.eventId}/consent/${params.intervieweeId}.png`;
-  await localUpsert('consents', {
+  await localUpsert('event_photos', {
     id,
-    interviewee_id: params.intervieweeId,
-    signature_path: storagePath,
-    signature_local_uri: params.signatureLocalUri,
-    consent_text_version: params.consentTextVersion,
-    signed_by_name: params.signedByName,
-    signed_at: ts,
+    event_id: eventId,
+    storage_path: `${eventId}/photos/${id}.jpg`,
+    local_uri: localUri,
+    position,
+    created_at: ts,
+    updated_at: ts,
+    deleted_at: null,
   });
+  return id;
+}
+
+export async function listPhotos(eventId: string): Promise<EventPhotoRow[]> {
+  return all<EventPhotoRow>(
+    `SELECT * FROM event_photos WHERE event_id=? AND deleted_at IS NULL
+     ORDER BY position`,
+    [eventId],
+  );
 }
 
 // -- Answers (the grid) ------------------------------------------------------
@@ -213,7 +308,12 @@ export async function saveRecordedAnswer(params: {
   const existing = await getAnswer(params.intervieweeId, params.questionId);
   const id = existing?.id ?? uuid();
   const ts = nowIso();
-  const storagePath = `${params.eventId}/${params.intervieweeId}/${params.questionId}.m4a`;
+  // expo-av takes are .m4a; live-caption takes are .wav (or whatever the
+  // compressor emits) — keep the real extension so upload content-type and
+  // Parakeet's format sniffing line up.
+  const match = params.localUri.toLowerCase().match(/\.(wav|mp3|m4a|aac)$/);
+  const ext = match?.[1] ?? 'm4a';
+  const storagePath = `${params.eventId}/${params.intervieweeId}/${params.questionId}.${ext}`;
   await localUpsert('answers', {
     id,
     interviewee_id: params.intervieweeId,

@@ -1,7 +1,7 @@
 # Privacy & Store Submission Checklist
 
 ## Cross-border processing disclosure (REQUIRED)
-Data rests in Sydney, but audio and transcripts are sent to **OpenAI (Whisper)** and
+Data rests in Sydney, but audio is sent to **Together AI (NVIDIA Parakeet)** for transcription and transcripts to
 **Anthropic (Claude)** in the **United States** for processing. Under the Australian
 Privacy Act **APP 8** this cross-border disclosure must appear in:
 - the **consent text** shown to each interviewee (Admin → Settings), and
@@ -17,8 +17,9 @@ Sample clause (have it legally reviewed):
   signature + timestamp, account email.
 - Purpose: interview capture, transcription, AI-assisted analysis, reporting.
 - Overseas disclosure (above).
-- Retention: audio auto-deleted 90 days after approval (configurable); transcripts
-  retained; manual early deletion available.
+- Retention: server audio auto-deleted when the event's report is generated;
+  configurable backstop (90 days default) for events that never produce a report;
+  the device keeps its copy 7 days post-report, then deletes it; transcripts retained.
 - Access & deletion: how a data subject requests access/deletion (admin performs it).
 - Security: encryption in transit, private storage, access controls.
 

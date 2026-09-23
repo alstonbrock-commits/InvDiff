@@ -3,7 +3,9 @@
 import { drainOutbox, outboxPendingCount, requeueFailed } from './outbox';
 import { drainUploads, pendingUploadCount } from './upload';
 import { pullAll } from './pull';
+import { sweepLocalAudio } from './localAudioSweep';
 import { isOnline, refreshConnectivity } from './connectivity';
+import { registerSyncWaiter } from '../db';
 
 export interface SyncStatus {
   running: boolean;
@@ -46,9 +48,19 @@ async function refreshCounts() {
   emit();
 }
 
+// A local-DB wipe waits for the run in progress before closing the handle.
+registerSyncWaiter(() => inFlight ?? Promise.resolve());
+
 export async function runSync(): Promise<void> {
   if (inFlight) return inFlight;
   inFlight = (async () => {
+    // Local housekeeping first — needs no network and self-throttles to ~daily.
+    try {
+      await sweepLocalAudio();
+    } catch {
+      // never fatal
+    }
+
     status.online = await refreshConnectivity();
     if (!status.online) {
       await refreshCounts();
@@ -67,7 +79,11 @@ export async function runSync(): Promise<void> {
       status.lastError = String(e);
     } finally {
       status.running = false;
-      await refreshCounts();
+      try {
+        await refreshCounts();
+      } catch {
+        // db may be mid-wipe; counts refresh on the next run
+      }
     }
   })().finally(() => {
     inFlight = null;

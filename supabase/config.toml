@@ -23,10 +23,23 @@ port = 54323
 [auth]
 enabled = true
 site_url = "interviewinsights://"
-additional_redirect_urls = ["interviewinsights://"]
+# Exact-match list — must contain the app's real OAuth callback. Mirror this
+# in the hosted dashboard: Authentication → URL Configuration.
+additional_redirect_urls = ["interviewinsights://", "interviewinsights://auth-callback"]
 jwt_expiry = 3600
 enable_signup = true           # open sign-up: facilitators self-register (Google/Apple)
+
+[auth.email]
 enable_confirmations = false   # OAuth-verified; no email confirmation step
+
+# Password reset is an in-app 6-digit code ({{ .Token }}), not a link — deep
+# links from email clients are unreliable on mobile. IMPORTANT: mirror this in
+# the hosted dashboard (Authentication → Email Templates → Reset Password);
+# the default hosted template only contains {{ .ConfirmationURL }} and the
+# in-app flow dead-ends without the code.
+[auth.email.template.recovery]
+subject = "Your Event Insight password reset code"
+content_path = "./supabase/templates/recovery.html"
 
 [storage]
 enabled = true
@@ -34,3 +47,13 @@ file_size_limit = "50MiB"
 
 [edge_runtime]
 enabled = true
+
+# Functions called by third parties (webhook, cron) rather than the app — no
+# Supabase JWT on the request. Each guards itself: the webhook checks its
+# shared secret, purge-expired-audio checks a header.
+# Deploy with `supabase functions deploy <name> --no-verify-jwt` as well.
+[functions.revenuecat-webhook]
+verify_jwt = false
+
+[functions.purge-expired-audio]
+verify_jwt = false

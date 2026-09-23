@@ -2,8 +2,12 @@
 // only ever invokes the functions with the user's JWT.
 import { callFunction } from './supabase';
 
+// Queues the synthesis and returns as soon as the job row exists — the work
+// itself runs in the background on the server and takes about a minute. Track
+// progress through ai_jobs (see fetchAnalysingEvents / fetchFailedInsightEvents),
+// never by awaiting this call.
 export function generateInsights(eventId: string) {
-  return callFunction<{ ok: boolean; count: number; unapproved: number }>(
+  return callFunction<{ ok: boolean; job_id: string; status: string }>(
     'generate-insights',
     { event_id: eventId },
   );
@@ -14,26 +18,6 @@ export function generateRecommendations(eventId: string) {
     'generate-recommendations',
     { event_id: eventId },
   );
-}
-
-export function retranscribe(answerId: string) {
-  return callFunction<{ ok: boolean; quality_score: number }>('transcribe', {
-    answer_id: answerId,
-  });
-}
-
-export function inviteUser(email: string, fullName: string, role: string) {
-  return callFunction<{ ok: boolean; user_id: string }>('invite-user', {
-    email,
-    full_name: fullName,
-    role,
-  });
-}
-
-export function purgeEventAudio(eventId: string) {
-  return callFunction<{ ok: boolean; purged: number }>('purge-event-audio', {
-    event_id: eventId,
-  });
 }
 
 // Best-effort email alert to the admin that an event was logged. The in-app

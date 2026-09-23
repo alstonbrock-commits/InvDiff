@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, FunctionsHttpError } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config';
@@ -25,11 +25,22 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 // Invoke an Edge Function with the current session's JWT attached.
+// On a non-2xx response, surface the function's own {error} message — the
+// generic "FunctionsHttpError: non-2xx status code" hides the real cause.
 export async function callFunction<T>(
   name: string,
   body: Record<string, unknown>,
 ): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>(name, { body });
-  if (error) throw error;
+  if (error) {
+    if (error instanceof FunctionsHttpError) {
+      const detail = await error.context
+        .json()
+        .then((j: { error?: string }) => j?.error)
+        .catch(() => null);
+      throw new Error(detail ? `${name}: ${detail}` : `${name} failed (${error.context.status})`);
+    }
+    throw error;
+  }
   return data as T;
 }
